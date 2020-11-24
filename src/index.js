@@ -1,6 +1,7 @@
 "use strict";
 import colors from "./colors.js";
 import fs from "fs";
+import { time } from "console";
 
 class timestamp {
     constructor () {
@@ -22,37 +23,42 @@ class timestamp {
 
 class load {
     constructor(settings) {
-        if (settings._dirname) this.filelog = fs.createWriteStream(`${settings._dirname}/log.txt`, { flags: 'a'});
+        if (settings) {
+            if (settings.dirname) {
+                this.filelog = fs.createWriteStream(`${settings.dirname}/log.txt`, { flags: 'a'});
+            }
+        }
 
         this.memory = console.memory;
         this.send = (...argumentus) => {
+            if (!settings && !settings.filter) return this.fatalError('NO PUEDES EJECUTAR .send() SIN ESTABLECER PARAMETROS A FILTRAR')
             let textfiltered = consoleFilter(settings.filter, argumentus.join(' '));
             console.log(`${colors["blue"]}[${new timestamp().timestring()}]`, textfiltered, colors["red"]);
-            if (settings._dirname) {
+            if (this.filelog) {
                 this.filelog.write(`b[${new timestamp().timestring()}] ${textfiltered}\n`);
             }
         }
         this.log = (...argumentus) => {
             console.log(`${colors["blue"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
-            if (settings._dirname) {
+            if (this.filelog) {
                 this.filelog.write(`b[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             }
         }
         this.warn = (...argumentus) => {
             console.warn(`${colors["yellow"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
-            if (settings._dirname) {
+            if (this.filelog) {
                 this.filelog.write(`y[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             }
         }
         this.err = (...argumentus) => {
             console.error(`${colors["red"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
-            if (settings._dirname) {
+            if (this.filelog) {
                 this.filelog.write(`r[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             }
         }
         this.fatalError = (...argumentus) => {
             console.error(`${colors["yellow"] + colors["bg-red"]}[${new timestamp().timestring()}]`, ...argumentus, colors["reset"] + colors["red"]);
-            if (settings._dirname) {
+            if (this.filelog) {
                 this.filelog.write(`y bgr[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             }
             process.exit(1);
@@ -66,7 +72,7 @@ class load {
         }
         this.success = (...argumentus) => {
             console.log(`${colors["green"]}[${new timestamp().timestring()}]`, ...argumentus, colors["reset"]);
-            if (settings._dirname) {
+            if (this.filelog) {
                 this.filelog.write(`g[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             }
         }
@@ -107,4 +113,7 @@ class socketEmisor {
     }
 }
 
-export default {load, timestamp}
+export default {
+    load: load,
+    timestamp: timestamp
+}

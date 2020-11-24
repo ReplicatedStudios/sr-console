@@ -1,8 +1,8 @@
 {
   "name": "sr-console",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Consola avanzada",
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
     "test": "node test.js"
   },
