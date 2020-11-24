@@ -1,0 +1,5 @@
+ESTE ES UN TXT CON LA INFO DE LO QUE CONTIENE ESTE NPM
+
+FILE-LOG | Sistema de FILELOGS con hora de post
+WEBSOCKET | Compatible con WEBSOCKETS por parte del usuario (SOCKET.IO)
+COLOR-CONSOLE | Identifica facilmente los errores y las advertencias con un sistema de colores asignado
