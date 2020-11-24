@@ -26,4 +26,4 @@ colors['blink'] = "\x1b[5m"
 colors['reverse'] = "\x1b[7m"
 colors['hidden'] = "\x1b[8m" 
 
-export default colors;
+module.exports = colors;

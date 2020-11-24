@@ -1,7 +1,6 @@
 "use strict";
-import colors from "./colors.js";
-import fs from "fs";
-import { time } from "console";
+const colors = require('./colors.js');
+const fs = require('fs');
 
 class timestamp {
     constructor () {
@@ -113,7 +112,7 @@ class socketEmisor {
     }
 }
 
-export default {
+module.exports = {
     load: load,
     timestamp: timestamp
 }

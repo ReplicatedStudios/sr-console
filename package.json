@@ -12,7 +12,7 @@
     "sr-console",
     "console.js"
   ],
-  "type": "module",
+  "type": "commonjs",
   "author": "VoxelatedSoftware",
   "license": "MIT",
   "dependencies": {

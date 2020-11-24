@@ -1,4 +1,2 @@
 "use strict";
-import SrConsole from './src/index.js';
-
-export default SrConsole;
+module.exports = require('./src/index.js');
