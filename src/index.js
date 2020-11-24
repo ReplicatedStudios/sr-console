@@ -20,36 +20,40 @@ class timestamp {
     }
 }
 
-class prep {
+class load {
     constructor(settings) {
         if (settings._dirname) this.filelog = fs.createWriteStream(`${settings._dirname}/log.txt`, { flags: 'a'});
 
         this.memory = console.memory;
-        this.send = (filter, ...argumentus) => {
-
+        this.send = (...argumentus) => {
+            let textfiltered = consoleFilter(settings.filter, argumentus.join(' '));
+            console.log(`${colors["blue"]}[${new timestamp().timestring()}]`, textfiltered, colors["red"]);
+            if (settings._dirname) {
+                this.filelog.write(`b[${new timestamp().timestring()}] ${textfiltered}\n`);
+            }
         }
         this.log = (...argumentus) => {
             console.log(`${colors["blue"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
             if (settings._dirname) {
-                this.filelog.write(`b[${new timestamp().timestring()}] ${argumentus.join(' ')}`);
+                this.filelog.write(`b[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             }
         }
         this.warn = (...argumentus) => {
             console.warn(`${colors["yellow"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
             if (settings._dirname) {
-                this.filelog.write(`y[${new timestamp().timestring()}] ${argumentus.join(' ')}`);
+                this.filelog.write(`y[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             }
         }
         this.err = (...argumentus) => {
             console.error(`${colors["red"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
             if (settings._dirname) {
-                this.filelog.write(`r[${new timestamp().timestring()}] ${argumentus.join(' ')}`);
+                this.filelog.write(`r[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             }
         }
         this.fatalError = (...argumentus) => {
             console.error(`${colors["yellow"] + colors["bg-red"]}[${new timestamp().timestring()}]`, ...argumentus, colors["reset"] + colors["red"]);
             if (settings._dirname) {
-                this.filelog.write(`y bgr[${new timestamp().timestring()}] ${argumentus.join(' ')}`);
+                this.filelog.write(`y bgr[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             }
             process.exit(1);
             
@@ -63,7 +67,7 @@ class prep {
         this.success = (...argumentus) => {
             console.log(`${colors["green"]}[${new timestamp().timestring()}]`, ...argumentus, colors["reset"]);
             if (settings._dirname) {
-                this.filelog.write(`g[${new timestamp().timestring()}] ${argumentus.join(' ')}`);
+                this.filelog.write(`g[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             }
         }
 
@@ -88,10 +92,19 @@ class prep {
     }
 }
 
+function consoleFilter(filter, value) {
+    let result = value;
+    for(let i = 0; i <= Object.keys(filter).length; i++) {
+      result = result.replace(filter[i], "");
+  
+      if (i == Object.keys(filter).length) return result;
+    }
+  }
+
 class socketEmisor {
     constructor (io) {
         
     }
 }
 
-export default {prep, timestamp}
+export default {load, timestamp}
