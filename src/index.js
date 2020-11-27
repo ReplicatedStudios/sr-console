@@ -23,57 +23,58 @@ class timestamp {
 class load {
     constructor(settings) {
         if (settings) {
-            if (settings.dirname) {
-                this.filelog = fs.createWriteStream(`${settings.dirname}/log.txt`, { flags: 'a'});
-            }
+            if (settings.dirname) this.filelog = fs.createWriteStream(`${settings.dirname}/log.txt`, { flags: 'a'});
+            try { this.filter = settings.filter; } catch (e) { this.filter = undefined; }
+            // try { this.socket = settings.io;} catch (e) { this.socket = undefined; }
         }
 
+
+        this.socket = undefined;
         this.memory = console.memory;
+        this.createSocket = (io) => {
+            if (!io) return false; 
+            this.socket = io;
+            return true;
+        }
         this.send = (...argumentus) => {
-            if (!settings && !settings.filter) return this.fatalError('NO PUEDES EJECUTAR .send() SIN ESTABLECER PARAMETROS A FILTRAR')
+            if (!settings && !this.filter) return this.fatalError('NO PUEDES EJECUTAR .send() SIN ESTABLECER PARAMETROS A FILTRAR')
             let textfiltered = consoleFilter(settings.filter, argumentus.join(' '));
             console.log(`${colors["blue"]}[${new timestamp().timestring()}]`, textfiltered, colors["red"]);
-            if (this.filelog) {
-                this.filelog.write(`b[${new timestamp().timestring()}] ${textfiltered}\n`);
-            }
+            if (this.filelog) this.filelog.write(`b[${new timestamp().timestring()}] ${textfiltered}\n`);
+            if (this.socket) socketEmisor(this.socket);
+            
+            return this;
         }
         this.log = (...argumentus) => {
             console.log(`${colors["blue"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
-            if (this.filelog) {
-                this.filelog.write(`b[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
-            }
+            if (this.filelog) this.filelog.write(`b[${new timestamp().timestring()}] ${textfiltered}\n`);
+            if (this.socket) socketEmisor(this.socket);
+            return this;
         }
         this.warn = (...argumentus) => {
             console.warn(`${colors["yellow"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
-            if (this.filelog) {
-                this.filelog.write(`y[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
-            }
-        }
+            if (this.filelog) this.filelog.write(`y[${new timestamp().timestring()}] ${textfiltered}\n`);
+            if (this.socket) socketEmisor(this.socket);
+            return this;
+        }    
         this.err = (...argumentus) => {
             console.error(`${colors["red"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
-            if (this.filelog) {
-                this.filelog.write(`r[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
-            }
+            if (this.filelog) this.filelog.write(`r[${new timestamp().timestring()}] ${textfiltered}\n`);
+            if (this.socket) socketEmisor(this.socket);
+            return this;
         }
+        this.error = this.err;
         this.fatalError = (...argumentus) => {
             console.error(`${colors["yellow"] + colors["bg-red"]}[${new timestamp().timestring()}]`, ...argumentus, colors["reset"] + colors["red"]);
-            if (this.filelog) {
-                this.filelog.write(`y bgr[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
-            }
+            if (this.filelog) this.filelog.write(`y bgr[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
+            if (this.socket) socketEmisor(this.socket);
             process.exit(1);
-            
-        }
-        /**
-         * @deprecated
-         */
-        this.exception = (argumentus) => {
-            console.exception(`${colors["yellow"] + colors["bg-red"]}[${new timestamp().timestring()}]`, ...argumentus, colors["reset"] + colors["red"]);
         }
         this.success = (...argumentus) => {
             console.log(`${colors["green"]}[${new timestamp().timestring()}]`, ...argumentus, colors["reset"]);
-            if (this.filelog) {
-                this.filelog.write(`g[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
-            }
+            if (this.filelog) this.filelog.write(`g[${new timestamp().timestring()}] ${textfiltered}\n`);
+            if (this.socket) socketEmisor(this.socket);
+            return this;
         }
 
         this.assert = console.assert;
@@ -106,9 +107,11 @@ function consoleFilter(filter, value) {
     }
   }
 
-class socketEmisor {
-    constructor (io) {
-        
+function socketEmisor(io) {
+    try {
+        io.sockets.emit("console" , value);
+    } catch (e) {
+        throw new Error('Algo salio mal al intentar emitir un Websocket').stack;
     }
 }
 
