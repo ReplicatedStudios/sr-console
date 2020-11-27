@@ -41,39 +41,39 @@ class load {
             let textfiltered = consoleFilter(settings.filter, argumentus.join(' '));
             console.log(`${colors["blue"]}[${new timestamp().timestring()}]`, textfiltered, colors["red"]);
             if (this.filelog) this.filelog.write(`b[${new timestamp().timestring()}] ${textfiltered}\n`);
-            if (this.socket) socketEmisor(this.socket);
+            if (this.socket) socketEmisor(this.socket, `${colors["blue"]}[${new timestamp().timestring()}]`, textfiltered, colors["red"]);
             
             return this;
         }
         this.log = (...argumentus) => {
             console.log(`${colors["blue"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
             if (this.filelog) this.filelog.write(`b[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
-            if (this.socket) socketEmisor(this.socket);
+            if (this.socket) socketEmisor(this.socket, `b[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             return this;
         }
         this.warn = (...argumentus) => {
             console.warn(`${colors["yellow"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
             if (this.filelog) this.filelog.write(`y[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
-            if (this.socket) socketEmisor(this.socket);
+            if (this.socket) socketEmisor(this.socket, `y[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             return this;
         }    
         this.err = (...argumentus) => {
             console.error(`${colors["red"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
             if (this.filelog) this.filelog.write(`r[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
-            if (this.socket) socketEmisor(this.socket);
+            if (this.socket) socketEmisor(this.socket, `r[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             return this;
         }
         this.error = this.err;
         this.fatalError = (...argumentus) => {
             console.error(`${colors["yellow"] + colors["bg-red"]}[${new timestamp().timestring()}]`, ...argumentus, colors["reset"] + colors["red"]);
             if (this.filelog) this.filelog.write(`y bgr[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
-            if (this.socket) socketEmisor(this.socket);
+            if (this.socket) socketEmisor(this.socket, `y bgr[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             process.exit(1);
         }
         this.success = (...argumentus) => {
             console.log(`${colors["green"]}[${new timestamp().timestring()}]`, ...argumentus, colors["reset"]);
             if (this.filelog) this.filelog.write(`g[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
-            if (this.socket) socketEmisor(this.socket);
+            if (this.socket) socketEmisor(this.socket,`g[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             return this;
         }
 
@@ -107,11 +107,12 @@ function consoleFilter(filter, value) {
     }
   }
 
-function socketEmisor(io) {
+function socketEmisor(io, value) {
     try {
         io.sockets.emit("console" , value);
+        return { status: true, err: null }
     } catch (e) {
-        throw new Error('Algo salio mal al intentar emitir un Websocket').stack;
+        return { status: false, err: e };
     }
 }
 
