@@ -41,7 +41,7 @@ class load {
             let textfiltered = consoleFilter(settings.filter, argumentus.join(' '));
             console.log(`${colors["blue"]}[${new timestamp().timestring()}]`, textfiltered, colors["red"]);
             if (this.filelog) this.filelog.write(`b[${new timestamp().timestring()}] ${textfiltered}\n`);
-            if (this.socket) socketEmisor(this.socket, `${colors["blue"]}[${new timestamp().timestring()}]`, textfiltered, colors["red"]);
+            if (this.socket) socketEmisor(this.socket, `b[${new timestamp().timestring()}] ${textfiltered}\n`);
             
             return this;
         }
