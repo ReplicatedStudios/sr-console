@@ -47,19 +47,19 @@ class load {
         }
         this.log = (...argumentus) => {
             console.log(`${colors["blue"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
-            if (this.filelog) this.filelog.write(`b[${new timestamp().timestring()}] ${textfiltered}\n`);
+            if (this.filelog) this.filelog.write(`b[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             if (this.socket) socketEmisor(this.socket);
             return this;
         }
         this.warn = (...argumentus) => {
             console.warn(`${colors["yellow"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
-            if (this.filelog) this.filelog.write(`y[${new timestamp().timestring()}] ${textfiltered}\n`);
+            if (this.filelog) this.filelog.write(`y[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             if (this.socket) socketEmisor(this.socket);
             return this;
         }    
         this.err = (...argumentus) => {
             console.error(`${colors["red"]}[${new timestamp().timestring()}]`, ...argumentus, colors["red"]);
-            if (this.filelog) this.filelog.write(`r[${new timestamp().timestring()}] ${textfiltered}\n`);
+            if (this.filelog) this.filelog.write(`r[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             if (this.socket) socketEmisor(this.socket);
             return this;
         }
@@ -72,7 +72,7 @@ class load {
         }
         this.success = (...argumentus) => {
             console.log(`${colors["green"]}[${new timestamp().timestring()}]`, ...argumentus, colors["reset"]);
-            if (this.filelog) this.filelog.write(`g[${new timestamp().timestring()}] ${textfiltered}\n`);
+            if (this.filelog) this.filelog.write(`g[${new timestamp().timestring()}] ${argumentus.join(' ')}\n`);
             if (this.socket) socketEmisor(this.socket);
             return this;
         }
