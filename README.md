@@ -27,15 +27,18 @@ console.err('Hola Erroneo Mundo'); // [00:28:46] Hola Erroneo Mundo - Rojo
 console.error('Hola alias de Erroneo Mundo'); // [00:28:46] Hola alias de Erroneo Mundo - Rojo
 console.success('Hola exitoso mundo'); // [00:28:46] Hola exitoso mundo - Verde
 console.trace('Hola guiado mundo'); // Trace: [00:28:46] Hola guiado mundo at... - Fondo rojo / Amarillo
-console.fatalError(new Error('Errores graves').stack); // [00:28:46] Error: Errores graves - Fondo rojo / Amarillo
 console.group("Hola Agrupado Mundo!") // [00:28:46] Hola Agrupado mundo - Magenta
+
+setTimeout(() => {
+    console.fatalError(new Error('Errores graves').stack); // [00:28:46] Error: Errores graves - Fondo rojo / Amarillo
+}, 2000)
 ```
 
 ## UTILIDADES
 La libreria no solo cambia de color los logs y les agrega hora, si no tambien cuenta con utilidades como el "Almacenamiento de Logs" y la emision de estos usando Websockets
 
 
-# Ejemplo de Websocket
+# Ejemplo de Websocket [SOCKET.IO]
 Instaciamos nuestra consola y creamos nuestro servidor websocket, despues usamos la funcion `createSocket()` y le agregamos como parametro el servidor websocket
 ```js
 const SrConsole = require('sr-console');
@@ -52,6 +55,56 @@ Para escuchar nuevas entradas en la consola solo debemos usar la siguiente linea
     socket.on('console', data => {
         // HAZ ALGO
     });
+```
+
+# Ejemplo `loadLogs()`
+Carga el archivo logs.txt generado automaticamente (si definimos dirname en su configuracion inicial) y nos returna el valor en forma de promesa o callback
+```js
+
+/* Returna el valor en texto plano */
+    console.loadLogs('string', (data) => {
+        //Do Someting
+    });
+
+    console.debug(console.loadLogs('string'));
+
+/* Returna los logs en forma de JSON */
+    console.loadLogs('json', (data) => {
+        //Do Someting with data
+    });
+
+    console.debug(console.loadLogs('json')); //Return: { msg: "Do someting", color: "%color-code%"}
+```
+
+# Codigos de color
+```js
+const colors = new Object();
+
+colors['black'] = "%bk%";
+colors['red'] = "%rd%";
+colors['green'] = "%gn%";
+colors['yellow'] = "%yl%";
+colors['blue'] = "%bl%";
+colors['magenta'] = "%mg%";
+colors['cyan'] = "%cy%";
+colors['white'] = "%wt%";
+
+colors['bg-black'] = "%bgbk%";
+colors['bg-red'] = "%bgrd%";
+colors['bg-green'] = "%bggn%";
+colors['bg-yellow'] = "%bgyl%";
+colors['bg-blue'] = "%bgbl%";
+colors['bg-magenta'] = "%bgmg%";
+colors['bg-cyan'] = "%bgcy%";
+colors['bg-white'] = "%bgwt%";
+
+colors['reset'] = "%reset%";
+colors['bright'] = "%bright%";
+colors['dim'] = "%dim%";
+colors['underscore'] = "%underscore%";
+colors['blink'] = "%blink%";
+colors['reverse'] = "%reverse%";
+colors['hidden'] = "%hidden%";
 ```
 
 ## EN DESARROLLO
