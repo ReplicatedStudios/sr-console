@@ -1,6 +1,4 @@
 node_modules
-funciones.txt
-test.js
-log.txt
-test-2.js
-.vscode
+src/js
+i.js
+i2.js

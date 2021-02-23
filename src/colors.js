@@ -1,29 +1,91 @@
-const colors = new Object();
-
-colors['black'] = "\x1b[30m";
-colors['red'] = "\x1b[31m";
-colors['green'] = "\x1b[32m";
-colors['yellow'] = "\x1b[33m";
-colors['blue'] = "\x1b[34m";
-colors['magenta'] = "\x1b[35m";
-colors['cyan'] = "\x1b[36m";
-colors['white'] = "\x1b[37m";
-
-colors['bg-black'] = "\x1b[40m";
-colors['bg-red'] = "\x1b[41m";
-colors['bg-green'] = "\x1b[42m";
-colors['bg-yellow'] = "\x1b[43m";
-colors['bg-blue'] = "\x1b[44m";
-colors['bg-magenta'] = "\x1b[45m";
-colors['bg-cyan'] = "\x1b[46m";
-colors['bg-white'] = "\x1b[47m";
-
-colors['reset'] = "\x1b[0m";
-colors['bright'] = "\x1b[1m";
-colors['dim'] = "\x1b[2m";
-colors['underscore'] = "\x1b[4m";
-colors['blink'] = "\x1b[5m";
-colors['reverse'] = "\x1b[7m";
-colors['hidden'] = "\x1b[8m";
-
-module.exports = colors;
+export class ColorString extends String {
+    constructor(param) {
+        super();
+        this.param = param;
+    }
+    load() {
+        return '\x1b' + this.param;
+    }
+}
+export class Colors {
+    constructor() {
+        this.black = new ColorString('[30m').load();
+        this.red = new ColorString('[31m').load();
+        this.green = new ColorString('[32m').load();
+        this.yellow = new ColorString('[33m').load();
+        this.blue = new ColorString('[34m').load();
+        this.magenta = new ColorString('[35m').load();
+        this.cyan = new ColorString('[36m').load();
+        this.white = new ColorString('[37m').load();
+        this.bg_black = new ColorString('[40m').load();
+        this.bg_red = new ColorString('[41m').load();
+        this.bg_green = new ColorString('[42m').load();
+        this.bg_yellow = new ColorString('[43m').load();
+        this.bg_blue = new ColorString('[44m').load();
+        this.bg_magenta = new ColorString('[45m').load();
+        this.bg_cyan = new ColorString('[46m').load();
+        this.bg_white = new ColorString('[47m').load();
+        this.reset = new ColorString('[0m').load();
+        this.bright = new ColorString('[1m').load();
+        this.dim = new ColorString('[2m').load();
+        this.underscore = new ColorString('[4m').load();
+        this.blink = new ColorString('[5m').load();
+        this.reserve = new ColorString('[7m').load();
+        this.hidden = new ColorString('[8m').load();
+        this.strikethrough = new ColorString('[9m').load();
+    }
+    get allNames() {
+        return [
+            'black',
+            'red',
+            'green',
+            'yellow',
+            'blue',
+            'magenta',
+            'cyan',
+            'white',
+            'bg-black',
+            'bg-red',
+            'bg-green',
+            'bg-yellow',
+            'bg-blue',
+            'bg-magenta',
+            'bg-cyan',
+            'bg-white',
+            'reset',
+            'bright',
+            'dim',
+            'underscore',
+            'blink',
+            'reverse',
+            'hidden'
+        ];
+    }
+    get allFilterNames() {
+        return [
+            '%bk%',
+            '%rd%',
+            '%gn%',
+            '%yl%',
+            '%bl%',
+            '%mg%',
+            '%cy%',
+            '%wt%',
+            '%bgbk%',
+            '%bgrd%',
+            '%bggn%',
+            '%bgyl%',
+            '%bgbl%',
+            '%bgmg%',
+            '%bgcy%',
+            '%bgwt%',
+            '%reset%',
+            '%bright%',
+            '%dim%',
+            '%underscore%',
+            '%blink%',
+            '%reverse%',
+            '%hidden%'
+        ];
+    }
+}
