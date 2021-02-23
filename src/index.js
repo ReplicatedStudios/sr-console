@@ -15,8 +15,13 @@ class srconsole {
 
         if (typeof settings === "object") {
             if (settings.dirname) {
-                this.__params.filestream = fs.createWriteStream(`${settings.dirname}/log.txt`, { flags: 'a', encoding: "utf-8" });
-                this.__params.dirname = settings.dirname;
+                try {
+                    this.__params.filestream = fs.createWriteStream(`${settings.dirname}/log.txt`, { flags: 'a', encoding: "utf-8" });
+                    this.__params.dirname = settings.dirname;
+                } catch (error) {
+                    
+                }
+
             }
             if (settings.filter) {
                 this.__params.filter = settings.filter;
