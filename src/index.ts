@@ -1,19 +1,19 @@
-import { Socket } from "dgram";
-import SocketIO from "socket.io";
-import fs from 'fs';
-import { Colors } from './colors.js';
-import { type } from "os";
+import { writeFileSync } from 'fs';
+import { stderr, stdin, stdout } from 'process';
+import { SrConsoleTools } from './tools.js';
+import SocketIO from 'socket.io'
 
-const $idcolors = new Colors();
+
+const SrTools = new SrConsoleTools();
 
 interface Params {
-    socket?: Socket | SocketIO.Server;
-    filter?: Array<String>;
-    dirname?: String;
+    socket?: WebSocket | SocketIO.Server;
+    filter?: Array<string>;
+    dirname?: string;
     options?: {
-        global: boolean;
-        dated: {
-            on: boolean;
+        globalEnv?: boolean;
+        dated?: {
+            mode: 'prefix' | 'suffix';
             format: string;
         };
     }
@@ -25,75 +25,84 @@ interface propTime {
     seconds: number | string;
 }
 
-export class ConsoleUtils {
-    params?: Params;
-    constructor(params?: Params) {
-        this.params = params;
+class ConsoleUtils {
+    options: Params;
+    constructor (params?: Params) {
+        if (params) this.options = params; else this.options = {}
     }
-
-    private _time?: propTime = {
+    /**
+     * Returna el estado de la memoria RAM en MB despues de que se llame cualquier funcion de impresion
+     */
+    public memory: number = 0;
+    protected groupTab: number = 0;
+    private _time: propTime = {
         hours: 0,
         minutes: 0,
         seconds: 0
     };
-    private _stdout = process.stdout;
-    private _stderr = process.stderr;
-    private _stdin = process.stdin;
 
-    protected _socketEmit(arg: string) {
+    protected _printStdOut(firstMessage: string, ...optionalMessages: Array<string>) {
+        //PROCESADO DE GRUPOS
+        let tabsToDo: string = ''
+        let countTab: number = 0;
+        while (countTab < this.groupTab) {
+            tabsToDo += '  ';
+        };
 
-    }
-
-    protected _printStdOut(mode: string, args: Array<Object | Array<any> | String | Object | Number | Function | Boolean | Symbol | undefined>) {
-        const doPrint: Array<string | any> = new Array();
-        for (const arg of args) {
-            const typearg = typeof arg;
-            if (!arg) doPrint.push($idcolors.black + $idcolors.bright + 'undefined' + $idcolors.reset);
-            else if (typearg === 'bigint') {
-                doPrint.push($idcolors.yellow + arg.toString());
-            } else if (typearg === 'boolean') {
-                doPrint.push($idcolors.green + arg.toString());
-            } else if (typearg === 'function') {
-                doPrint.push($idcolors.blue + arg.toString());
-            } else if (typearg === 'number') {
-                doPrint.push($idcolors.yellow + arg.toString());
-            } else if (typearg === 'object') {
-                doPrint.push(JSON.stringify(arg));
-            } else if (typearg === 'string') {
-                if (mode === 'log') {
-                    doPrint.push($idcolors.cyan + arg.toString());
-                } else if (mode === 'debug') {
-                    doPrint.push($idcolors.blue + arg.toString());
-                } else if (mode === 'sucess') {
-                    doPrint.push($idcolors.green + arg.toString());
-                } else if (mode === 'group') {
-                    doPrint.push($idcolors.magenta + arg.toString());
-                }
-            } else if (typearg === 'symbol') {
-                doPrint.push($idcolors.white + arg.toString());
-            } else {
-                doPrint.push($idcolors.cyan + arg.toString());
-            }
+        //PROCESADO DE FECHA-HORA
+        let dateToDo: string = ''
+        if (this.options.options?.dated) {
+            dateToDo = this._makeADate();
         }
-        this._stdout.write(doPrint.join(' ') + $idcolors.reset + '\n', (err) => {
-            if (err) throw err;
 
-        })
+        let concated = tabsToDo;
+        stdout.write(concated + firstMessage + this._makeADate() + ' ' + optionalMessages.join(' ') + '\n');
     }
 
-    protected _printStdErr(mode: string, args: Array<string> | Error) {
-        if (Array.isArray(args)) {
-            this._stderr.write(args.join(' ') + '\n', (err) => {
-                if (err) throw err;
-            });
-        } else {
-            this._stderr.write(args + '\n', (err) => {
-                if (err) throw err;
-            });
+    protected _printStdErr(firstMessage: string, ...optionalMessages: Array<string>) {
+        let tabsToDo: string = ''
+        let countTab: number = 0;
+        while (countTab < this.groupTab) {
+            tabsToDo += '  ';
+        };
+
+        let dateToDo: string = ''
+        if (this.options.options?.dated) {
+            dateToDo = this._makeADate();
         }
+
+        let concated = tabsToDo;
+
+        stderr.write(concated + firstMessage + this._makeADate() + ' ' + optionalMessages.join(' ') + '\n');
+        this._processMemory();
     }
 
-    protected _makeTime(format: string) {
+    protected _processMemory() {
+        this.memory = Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100;
+    }
+
+    protected _stringingToPrint(param: any): string {
+        const typeParam = typeof param;
+
+        if (typeParam === 'string') return param; 
+        else if (typeParam === 'object') return this._objectToPrint(param);
+        else if (typeParam === 'number') return param.toString();
+        else if (typeParam === 'bigint') return param.toString();
+        else if (typeParam === 'boolean') if (param) return 'true'; else return 'false'; 
+        else if (typeParam === 'function') return this._objectToPrint(param);
+        else if (typeParam === 'symbol') return param.toString();
+        else if (typeParam === 'undefined') return 'undefined';
+        else return 'undefined';
+    }
+
+    /**
+     * @param {object} param
+     */
+    protected _objectToPrint(param: object | Array<any>): string {
+        return param.toString();
+    }
+
+    protected _makeADate() {
         let _date = new Date();
         if (typeof this._time !== 'object') return `[ERR:ERR:ERR]`
         this._time.hours = _date.getHours();
@@ -108,72 +117,85 @@ export class ConsoleUtils {
     }
 }
 
-export class Console extends ConsoleUtils {
-    memory: Number;
+class Console extends ConsoleUtils {
+    params?: Params;
     constructor(params?: Params) {
         super(params);
-        this.memory = 0;
         this.params = params;
     }
 
     /**
-     * Prints to stdout with a new line [common color]
-     * @param {any} args
+     * Imprime en la consola el mensaje con un salto de linea
+     * @color Comun
+     * @param {any} message
+     * @param {Array<any>} optional
      */
-    public log(...args: any) {
-        const $args: Array<any> = args;
-        if (this.params?.options?.dated.on) {
-            $args.unshift(this._makeTime(this.params.options.dated.format));
-        } 
-        this._printStdOut('log', args);
+    public log(message: any, ...optional: Array<any>): void {
+        const __message = this._stringingToPrint(message);
+        
+        this._printStdOut(SrTools.colors('blue'), __message, ...optional);
     }
 
     /**
-     * Prints to stdout with a new line using a word-filter [common color]
-     * @param {any} args
+     * Filtra e Imprime en la consola el mensaje con un salto de linea
+     * @color Comun
+     * @param {any} message
+     * @param {Array<string>} optional
      */
-    public send(...args: any) {
-        this._printStdOut('log', args);
+    public send(message: any, ...optional: Array<any>) {
+        const __message = this._stringingToPrint(message);
+        
+        this._printStdOut(SrTools.colors('blue'), __message, ...optional);
     }
 
     /**
      * Prints to stdout with a new line and show the JS line [non-common color]
      * @param {any} args
      */
-    public debug(...args: any) {
-        this._printStdOut('debug', args);
+    public debug(message: any, ...optional: Array<string>) {
+        const __message = this._stringingToPrint(message);
+        
+        this._printStdOut(SrTools.colors('cyan'), __message, ...optional);
     }
 
     /**
      * Prints Warnings to stderr with a new line [warn color]
      * @param {any} args
      */
-    public warn(...args: any) {
-        this._printStdErr('warn', args);
+    public warn(message: any, ...optional: Array<string>) {
+        const __message = this._stringingToPrint(message);
+        
+        this._printStdErr(SrTools.colors('yellow'), __message, ...optional);
     }
 
     /**
      * Prints Errors to stderr with a new line [error color]
      * @param {any} args
      */
-    public err(...args: any) {
-        this._printStdErr('err', args);
+    public err(message: any, ...optional: Array<string>) {
+        const __message = this._stringingToPrint(message);
+        
+        this._printStdErr(SrTools.colors('red'), __message, ...optional);
     }
 
     /**
      * Prints Errors to stderr with a new line and exit procees with 500 [FError color] 
      * @param {Error} arg
      */
-    public fatalE(arg: Error) {
-        this._printStdErr('ferr', arg);
+    public fatalE(message: any) {
+        const __message = this._stringingToPrint(message);
+        
+        this._printStdErr(SrTools.colors('red'), __message);
     }
 
     /**
      * Prints a successful operation to stdout with a new line
      * @param {Error} arg
      */
-    public success(...args: any) {
-
+    public success(message: any, ...optional: any) {
+        const __message = this._stringingToPrint(message);
+        
+        this._printStdOut(SrTools.colors('green'), __message, ...optional);
     }
 
     /**
@@ -181,7 +203,7 @@ export class Console extends ConsoleUtils {
      * @param {arg} opt 
      * @param {any} args 
      */
-    public dir(opt: Object, ...args: any) {
+    public dir(opt: Object, message: any, ...optional: any) {
 
     }
 
@@ -192,7 +214,7 @@ export class Console extends ConsoleUtils {
      * @param {any} args
      * @deprecated Since 30 January
      */
-    public dirxml(opt: Object, ...args: any) {
+    public dirxml(opt: Object, message: any, ...optional: any) {
 
     }
 
@@ -200,24 +222,32 @@ export class Console extends ConsoleUtils {
      * Prints a log message with a initial space and all new lines print a new-line message
      * @param {any} args
      */
-    public group(...args: any) {
+    public group(message: any, ...optional: any) {
+        const __message = this._stringingToPrint(message);
+        this.groupTab++;
 
+        this._printStdOut(SrTools.colors('magenta'), __message, ...optional);
     }
 
     /**
      * Prints a log message with a initial spacea and clear the group created before
      * @param {any} args
      */
-    public groupEnd(...args: any) {
-
+    public groupEnd(message: any, ...optional: any) {
+        const __message = this._stringingToPrint(message);
+        if (this.groupTab !== 0) this.groupTab--;
+        
+        this._printStdOut(SrTools.colors('magenta'), __message, ...optional);
     }
 
     /**
      * Prints 'Message' and a trace of the function
      * @param {any} args
      */
-    public trace(message: string, ...args: any) {
-
+    public trace(message: string, ...optional: any) {
+        const __message = this._stringingToPrint(message);
+        
+        this._printStdErr(SrTools.colors('red'), __message, ...optional);
     }
 
     /**
@@ -226,8 +256,10 @@ export class Console extends ConsoleUtils {
      * @param {string} message
      * @param {any} args
      */
-    public assert(value: any, message: string, args: any) {
-
+    public assert(value: any, message: string, ...optional: any) {
+        const __message = this._stringingToPrint(message);
+        
+        this._printStdOut(SrTools.colors('white'), __message, ...optional);
     }
 
     /**
@@ -258,7 +290,7 @@ export class Console extends ConsoleUtils {
      * For a timer that was previously started by calling {@link console._time()}, prints the elapsed time and other data arguments to stdout.
      * @param label 
      */
-    public timeStamp(label?: string, ...args: any) {
+    public timeStamp(message: any, label?: string, ...optional: any) {
 
     }
 
@@ -285,13 +317,6 @@ export class Console extends ConsoleUtils {
     public exception(args: any) {
 
     }
-
-
-    /* ALIAS FOR ANY FUNCTION */
-    public error: Function = this.err;
-    public successful: Function = this.success;
-    public ungroup: Function = this.groupEnd;
-    public grou$idcolorslapsed: Function = this.groupEnd;
-    public info: Function = this.log;
-
 }
+
+export default Console;

@@ -1,17 +1,27 @@
 # Sr-Console | Una vista mas organizada
 Una libreria que le da mas color a los logs de tu aplicacion para que sea facilmente comprensible con herramientas utiles.
 
-## COMENCEMOS
-En este ejemplo remplazaremos la variable global `console` para que de esta forma de nos sea mas facil acceder a ella
+### AVISO
+EL MODULO AUN ESTA EN BETA YA QUE SE HA MIGRADO A TYPESCRIPT
+
+## INICIO
+Configuracion inicial
 ```js
 const SrConsole = require('sr-console');
 const console = new SrConsole({
-    _dirname: _dirname
+    socket: io, //Websocket Node.js o Socket.io Server
     filter: [
-        "none ",
-        "terrible ",
-        "abominable "
+        "secret_token_no_loggable",
+        "i hate bananas"
     ]
+    dirname: _dirname, //donde se situara el archivo logs.txt
+    options: {
+        globalEnv: true, //El modulo internamente remplaza la variable global Console por SrConsole
+        dated: {
+            mode: 'prefix' //prefix, suffix
+            format: 'hh:ss:mm' //por defecto
+        }
+    }
 });
 ```
 
@@ -55,25 +65,6 @@ Para escuchar nuevas entradas en la consola solo debemos usar la siguiente linea
     socket.on('console', data => {
         // HAZ ALGO
     });
-```
-
-# Ejemplo `loadLogs()`
-Carga el archivo logs.txt generado automaticamente (si definimos dirname en su configuracion inicial) y nos returna el valor en forma de promesa o callback
-```js
-
-/* Returna el valor en texto plano */
-    console.loadLogs('string', (data) => {
-        //Do Someting
-    });
-
-    console.debug(console.loadLogs('string'));
-
-/* Returna los logs en forma de JSON */
-    console.loadLogs('json', (data) => {
-        //Do Someting with data
-    });
-
-    console.debug(console.loadLogs('json')); //Return: { msg: "Do someting", color: "%color-code%"}
 ```
 
 # Codigos de color
