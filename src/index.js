@@ -18,10 +18,9 @@ class ConsoleUtils {
     _printStdOut(firstMessage, ...optionalMessages) {
         let tabsToDo = '';
         let countTab = 0;
-        while (countTab < this.groupTab) {
-            tabsToDo += '  ';
+        for (let i = 0; i < this.groupTab; i++) {
+            tabsToDo += ' ';
         }
-        ;
         let dateToDo = '';
         if (this.options.options?.dated) {
             dateToDo = this._makeADate();

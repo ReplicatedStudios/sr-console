@@ -45,9 +45,9 @@ class ConsoleUtils {
         //PROCESADO DE GRUPOS
         let tabsToDo: string = ''
         let countTab: number = 0;
-        while (countTab < this.groupTab) {
-            tabsToDo += '  ';
-        };
+        for (let i = 0; i < this.groupTab; i++) {
+            tabsToDo += ' ';
+        }
 
         //PROCESADO DE FECHA-HORA
         let dateToDo: string = ''
