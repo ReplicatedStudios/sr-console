@@ -62,9 +62,9 @@ class ConsoleUtils {
     protected _printStdErr(firstMessage: string, ...optionalMessages: Array<string>) {
         let tabsToDo: string = ''
         let countTab: number = 0;
-        while (countTab < this.groupTab) {
-            tabsToDo += '  ';
-        };
+        for (let i = 0; i < this.groupTab; i++) {
+            tabsToDo += ' ';
+        }
 
         let dateToDo: string = ''
         if (this.options.options?.dated) {
