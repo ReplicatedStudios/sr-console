@@ -1,51 +1,61 @@
-import SocketIO from 'socket.io';
-interface Params {
-    socket?: WebSocket | SocketIO.Server;
-    filter?: Array<string>;
+/// <reference types="node" />
+import { WriteStream } from "fs";
+import { ConsoleFilteredColors } from "./tools/colors.js";
+import { TimeBuildMethods } from "./tools/time.js";
+import SocketIO from "socket.io";
+export interface ConsoleConfig {
     dirname?: string;
-    options?: {
-        globalEnv?: boolean;
-        dated?: {
-            mode: 'prefix' | 'suffix';
-            format: string;
-        };
-    };
+    filter?: Array<string>;
+    time?: keyof TimeBuildMethods;
+    socketIO?: SocketIO.Server;
+    websocket?: WebSocket;
 }
-declare class ConsoleUtils {
-    options: Params;
-    constructor(params?: Params);
+declare class ConsoleUtil {
+    config: ConsoleConfig;
+    _fileStream?: WriteStream;
+    constructor(config?: ConsoleConfig);
     memory: number;
-    protected groupTab: number;
-    private _time;
-    protected _printStdOut(firstMessage: string, ...optionalMessages: Array<string>): void;
-    protected _printStdErr(firstMessage: string, ...optionalMessages: Array<string>): void;
-    protected _processMemory(): void;
-    protected _stringingToPrint(param: any): string;
-    protected _objectToPrint(param: object | Array<any>): string;
-    protected _makeADate(): string;
+    protected _groups: number;
+    protected _counts: object;
+    protected stdOut: NodeJS.WriteStream & {
+        fd: 1;
+    };
+    protected stdErr: NodeJS.WriteStream & {
+        fd: 2;
+    };
+    protected stdIn: NodeJS.ReadStream & {
+        fd: 0;
+    };
+    protected _readMemory(): void;
+    protected _resolveTypeOfColor(values: any[], color: keyof ConsoleFilteredColors, method: 'normal' | 'filtered'): string;
+    protected _sendToSockets(method: 'in' | 'out' | 'err', msg: string): void;
+    protected _printToConsole(color: keyof ConsoleFilteredColors, std: 'in' | 'out' | 'err', message: any, optMessage: any[]): Promise<void>;
 }
-declare class Console extends ConsoleUtils {
-    params?: Params;
-    constructor(params?: Params);
-    log(message: any, ...optional: Array<any>): void;
-    send(message: any, ...optional: Array<any>): void;
-    debug(message: any, ...optional: Array<string>): void;
-    warn(message: any, ...optional: Array<string>): void;
-    err(message: any, ...optional: Array<string>): void;
-    fatalE(message: any): void;
-    success(message: any, ...optional: any): void;
-    dir(opt: Object, message: any, ...optional: any): void;
-    dirxml(opt: Object, message: any, ...optional: any): void;
-    group(message: any, ...optional: any): void;
-    groupEnd(message: any, ...optional: any): void;
-    trace(message: string, ...optional: any): void;
-    assert(value: any, message: string, ...optional: any): void;
-    count(label: string): void;
-    countReset(label: string): void;
-    time(label?: string): void;
-    timeStamp(message: any, label?: string, ...optional: any): void;
-    timeEnd(label?: string): void;
-    table(args: Object | Array<any>): void;
-    exception(args: any): void;
+export declare class Console extends ConsoleUtil {
+    constructor(config?: ConsoleConfig);
+    log(msg: any, ...optMessage: any[]): void;
+    send(msg: any, ...optMessage: any[]): void;
+    warn(msg: any, ...optMessage: any[]): void;
+    debug(msg: any, ...optMessage: any[]): void;
+    info(msg: any, ...optMessage: any[]): void;
+    error(msg: any, ...optMessage: any[]): void;
+    assert(msg: any, ...optMessage: any[]): void;
+    clear(): void;
+    group(msg: any, ...optMessage: any[]): void;
+    groupEnd(msg: any, ...optMessage: any[]): void;
+    groupCollapsed(msg: any, ...optMessage: any[]): void;
+    count(): void;
+    countReset(): void;
+    dir(): void;
+    dirxml(): void;
+    table(): void;
+    time(): void;
+    timeEnd(): void;
+    timeLog(): void;
+    timeStamp(): void;
+    trace(): void;
+    profile(): void;
+    profileEnd(): void;
+    Console: typeof Console;
 }
 export default Console;

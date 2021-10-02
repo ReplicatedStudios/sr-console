@@ -1,163 +1,157 @@
-import { stderr, stdout } from 'process';
-import { SrConsoleTools } from './tools.js';
-const SrTools = new SrConsoleTools();
-class ConsoleUtils {
-    constructor(params) {
-        this.memory = 0;
-        this.groupTab = 0;
-        this._time = {
-            hours: 0,
-            minutes: 0,
-            seconds: 0
-        };
-        if (params)
-            this.options = params;
-        else
-            this.options = {};
+import { createWriteStream } from "fs";
+import Colors from "./tools/colors.js";
+import Time from "./tools/time.js";
+import { stderr, stdin, stdout } from 'process';
+class ConsoleUtil {
+    config;
+    _fileStream;
+    constructor(config) {
+        this.config = !config ? {} : config;
+        this._fileStream = this.config.dirname ? createWriteStream(this.config.dirname + '/logs.txt', 'utf-8') : undefined;
     }
-    _printStdOut(firstMessage, ...optionalMessages) {
-        let tabsToDo = '';
-        let countTab = 0;
-        for (let i = 0; i < this.groupTab; i++) {
-            tabsToDo += ' ';
-        }
-        let dateToDo = '';
-        if (this.options.options?.dated) {
-            dateToDo = this._makeADate();
-        }
-        let concated = tabsToDo;
-        stdout.write(concated + firstMessage + this._makeADate() + ' ' + optionalMessages.join(' ') + '\n');
+    memory = 0;
+    _groups = 0;
+    _counts = new Object({ index: 0 });
+    stdOut = stdout;
+    stdErr = stderr;
+    stdIn = stdin;
+    _readMemory() {
+        this.memory = Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100;
+        return;
     }
-    _printStdErr(firstMessage, ...optionalMessages) {
-        let tabsToDo = '';
-        let countTab = 0;
-        while (countTab < this.groupTab) {
-            tabsToDo += '  ';
+    _resolveTypeOfColor(values, color, method) {
+        if (method === 'normal') {
+            let resolvedString = '';
+            values.forEach((msg, i, arr) => {
+                try {
+                    typeof msg === 'string' && (resolvedString += `${Colors[color] + msg} `);
+                    typeof msg === 'number' && (resolvedString += `${Colors['green'] + msg.toString()} `);
+                    typeof msg === 'boolean' && (resolvedString += `${Colors['green'] + msg} `);
+                    typeof msg === 'bigint' && (resolvedString += `${Colors['green'] + msg.toString()} `);
+                    typeof msg === 'function' && (resolvedString += `${Colors['yellow'] + msg.toString()} `);
+                    typeof msg === 'object' && (resolvedString += `${Colors['red'] + msg.toString()} `);
+                    typeof msg === 'symbol' && (resolvedString += `${Colors['magenta'] + msg.toString()} `);
+                    typeof msg === 'undefined' && (resolvedString += `${Colors[color] + Colors['underscore'] + 'undefined'} `);
+                }
+                catch (e) {
+                    resolvedString += e;
+                }
+            });
+            return resolvedString;
+        }
+        else {
+            let resolvedString = '';
+            values.forEach((msg, i, arr) => {
+                try {
+                    typeof msg === 'string' && (resolvedString += `${Colors.Filtered['blue'] + msg} `);
+                    typeof msg === 'number' && (resolvedString += `${Colors.Filtered['green'] + msg.toString()} `);
+                    typeof msg === 'boolean' && (resolvedString += `${Colors.Filtered['green'] + msg} `);
+                    typeof msg === 'bigint' && (resolvedString += `${Colors.Filtered['green'] + msg.toString()} `);
+                    typeof msg === 'function' && (resolvedString += `${Colors.Filtered['yellow'] + msg.toString()} `);
+                    typeof msg === 'object' && (resolvedString += `${Colors.Filtered['red'] + msg.toString()} `);
+                    typeof msg === 'symbol' && (resolvedString += `${Colors.Filtered['magenta'] + msg.toString()} `);
+                    typeof msg === 'undefined' && (resolvedString += `${Colors.Filtered['blue'] + Colors.Filtered['underscore'] + 'undefined'} `);
+                }
+                catch (e) {
+                    resolvedString += e;
+                }
+            });
+            return resolvedString;
         }
         ;
-        let dateToDo = '';
-        if (this.options.options?.dated) {
-            dateToDo = this._makeADate();
+    }
+    _sendToSockets(method, msg) {
+        this.config.socketIO?.emit(`console:${method}`, msg);
+        this.config.websocket?.send(msg);
+    }
+    async _printToConsole(color, std, message, optMessage) {
+        let spaceGroups = ``;
+        let i = 0;
+        while (this._groups > i) {
+            spaceGroups += `  `;
+            i++;
         }
-        let concated = tabsToDo;
-        stderr.write(concated + firstMessage + this._makeADate() + ' ' + optionalMessages.join(' ') + '\n');
-        this._processMemory();
-    }
-    _processMemory() {
-        this.memory = Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100;
-    }
-    _stringingToPrint(param) {
-        const typeParam = typeof param;
-        if (typeParam === 'string')
-            return param;
-        else if (typeParam === 'object')
-            return this._objectToPrint(param);
-        else if (typeParam === 'number')
-            return param.toString();
-        else if (typeParam === 'bigint')
-            return param.toString();
-        else if (typeParam === 'boolean')
-            if (param)
-                return 'true';
-            else
-                return 'false';
-        else if (typeParam === 'function')
-            return this._objectToPrint(param);
-        else if (typeParam === 'symbol')
-            return param.toString();
-        else if (typeParam === 'undefined')
-            return 'undefined';
-        else
-            return 'undefined';
-    }
-    _objectToPrint(param) {
-        return param.toString();
-    }
-    _makeADate() {
-        let _date = new Date();
-        if (typeof this._time !== 'object')
-            return `[ERR:ERR:ERR]`;
-        this._time.hours = _date.getHours();
-        this._time.minutes = _date.getMinutes();
-        this._time.seconds = _date.getSeconds();
-        if (this._time.hours <= 9)
-            this._time.hours = `0${this._time.hours}`;
-        if (this._time.minutes <= 9)
-            this._time.minutes = `0${this._time.minutes}`;
-        if (this._time.seconds <= 9)
-            this._time.seconds = `0${this._time.seconds}`;
-        return `[${this._time.hours}:${this._time.minutes}:${this._time.seconds}]`;
+        const msg = `${spaceGroups}${new Time().build(this.config.time)}${message} `;
+        std === 'err' && (this.stdErr.write(Colors[color] + msg + this._resolveTypeOfColor(optMessage, color, 'normal') + '\n' + Colors.reset));
+        std === 'in' && (this.stdIn.write(Colors[color] + msg + this._resolveTypeOfColor(optMessage, color, 'normal') + '\n' + Colors.reset));
+        std === 'out' && (this.stdOut.write(Colors[color] + msg + this._resolveTypeOfColor(optMessage, color, 'normal') + '\n' + Colors.reset));
+        this._sendToSockets(std, Colors.Filtered[color] + msg + this._resolveTypeOfColor(optMessage, color, 'filtered') + Colors.Filtered.reset);
+        this._fileStream?.write(Colors.Filtered[color] + msg + this._resolveTypeOfColor(optMessage, color, 'filtered') + '\n' + Colors.Filtered.reset);
+        this._readMemory();
     }
 }
-class Console extends ConsoleUtils {
-    constructor(params) {
-        super(params);
-        this.params = params;
+export class Console extends ConsoleUtil {
+    constructor(config) {
+        super(config);
     }
-    log(message, ...optional) {
-        const __message = this._stringingToPrint(message);
-        this._printStdOut(SrTools.colors('blue'), __message, ...optional);
+    log(msg, ...optMessage) {
+        this._printToConsole('blue', 'out', msg, optMessage);
     }
-    send(message, ...optional) {
-        const __message = this._stringingToPrint(message);
-        this._printStdOut(SrTools.colors('blue'), __message, ...optional);
+    send(msg, ...optMessage) {
+        let messageFiltered = msg;
+        if (this.config.filter) {
+            this.config.filter.forEach((word, i, arr) => {
+                messageFiltered.replace(new RegExp(word, 'gi'), ' ');
+            });
+        }
+        this._printToConsole('blue', 'out', msg, optMessage);
     }
-    debug(message, ...optional) {
-        const __message = this._stringingToPrint(message);
-        this._printStdOut(SrTools.colors('cyan'), __message, ...optional);
+    warn(msg, ...optMessage) {
+        this._printToConsole('yellow', 'err', msg, optMessage);
     }
-    warn(message, ...optional) {
-        const __message = this._stringingToPrint(message);
-        this._printStdErr(SrTools.colors('yellow'), __message, ...optional);
+    debug(msg, ...optMessage) {
+        this._printToConsole('cyan', 'out', msg, optMessage);
     }
-    err(message, ...optional) {
-        const __message = this._stringingToPrint(message);
-        this._printStdErr(SrTools.colors('red'), __message, ...optional);
+    info(msg, ...optMessage) {
+        this._printToConsole('cyan', 'out', msg, optMessage);
     }
-    fatalE(message) {
-        const __message = this._stringingToPrint(message);
-        this._printStdErr(SrTools.colors('red'), __message);
+    error(msg, ...optMessage) {
+        this._printToConsole('red', 'err', msg, optMessage);
     }
-    success(message, ...optional) {
-        const __message = this._stringingToPrint(message);
-        this._printStdOut(SrTools.colors('green'), __message, ...optional);
+    assert(msg, ...optMessage) {
+        this._printToConsole('white', 'err', msg, optMessage);
     }
-    dir(opt, message, ...optional) {
+    clear() {
+        this._printToConsole('reset', 'out', '\n\n\n\n\n\n\n\n\n\n\n\n\n', []);
     }
-    dirxml(opt, message, ...optional) {
+    group(msg, ...optMessage) {
+        this._printToConsole('magenta', 'out', msg, optMessage);
+        this._groups++;
     }
-    group(message, ...optional) {
-        const __message = this._stringingToPrint(message);
-        this.groupTab++;
-        this._printStdOut(SrTools.colors('magenta'), __message, ...optional);
+    groupEnd(msg, ...optMessage) {
+        if (this._groups !== 0)
+            this._groups--;
+        this._printToConsole('magenta', 'out', msg, optMessage);
     }
-    groupEnd(message, ...optional) {
-        const __message = this._stringingToPrint(message);
-        if (this.groupTab !== 0)
-            this.groupTab--;
-        this._printStdOut(SrTools.colors('magenta'), __message, ...optional);
+    groupCollapsed(msg, ...optMessage) {
+        if (this._groups !== 0)
+            this._groups--;
+        this._printToConsole('magenta', 'out', msg, optMessage);
     }
-    trace(message, ...optional) {
-        const __message = this._stringingToPrint(message);
-        this._printStdErr(SrTools.colors('red'), __message, ...optional);
+    count() {
     }
-    assert(value, message, ...optional) {
-        const __message = this._stringingToPrint(message);
-        this._printStdOut(SrTools.colors('white'), __message, ...optional);
+    countReset() {
     }
-    count(label) {
+    dir() {
     }
-    countReset(label) {
+    dirxml() {
     }
-    time(label) {
+    table() {
     }
-    timeStamp(message, label, ...optional) {
+    time() {
     }
-    timeEnd(label) {
+    timeEnd() {
     }
-    table(args) {
+    timeLog() {
     }
-    exception(args) {
+    timeStamp() {
     }
+    trace() {
+    }
+    profile() {
+    }
+    profileEnd() {
+    }
+    Console = Console;
 }
 export default Console;

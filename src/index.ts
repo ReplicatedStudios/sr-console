@@ -1,322 +1,215 @@
-import { writeFileSync } from 'fs';
+import { writeFileSync, createWriteStream, WriteStream } from "fs";
+import Colors, { ConsoleColors, ConsoleFilteredColors } from "./tools/colors.js";
+import Time, { TimeBuildMethods } from "./tools/time.js";
 import { stderr, stdin, stdout } from 'process';
-import { SrConsoleTools } from './tools.js';
-import SocketIO from 'socket.io'
+import SocketIO from "socket.io";
 
-
-const SrTools = new SrConsoleTools();
-
-interface Params {
-    socket?: WebSocket | SocketIO.Server;
-    filter?: Array<string>;
+export interface ConsoleConfig {
     dirname?: string;
-    options?: {
-        globalEnv?: boolean;
-        dated?: {
-            mode: 'prefix' | 'suffix';
-            format: string;
+    filter?: Array<string>;
+    time?: keyof TimeBuildMethods;
+    socketIO?: SocketIO.Server;
+    websocket?: WebSocket;
+}
+
+class ConsoleUtil {
+    config: ConsoleConfig;
+    _fileStream?: WriteStream;
+    constructor(config?: ConsoleConfig) {
+        this.config = !config ? {} : config;
+        this._fileStream = this.config.dirname ? createWriteStream(this.config.dirname + '/logs.txt', 'utf-8') : undefined;
+    }
+
+    public memory: number = 0;
+    protected _groups: number = 0;
+    protected _counts: object = new Object({ index: 0 });
+    protected stdOut = stdout;
+    protected stdErr = stderr;
+    protected stdIn = stdin;
+
+    protected _readMemory(): void {
+        this.memory = Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100;
+        return;
+    }
+
+    protected _resolveTypeOfColor(values: any[], color: keyof ConsoleFilteredColors, method: 'normal' | 'filtered'): string {
+        if (method === 'normal') {
+            let resolvedString: string = '';
+
+            values.forEach((msg, i, arr) => {
+                try {
+                    typeof msg === 'string' && (resolvedString += `${Colors[color] + msg} `);
+                    typeof msg === 'number' && (resolvedString += `${Colors['green'] + msg.toString()} `);
+                    typeof msg === 'boolean' && (resolvedString += `${Colors['green'] + msg} `);
+                    typeof msg === 'bigint' && (resolvedString += `${Colors['green'] + msg.toString()} `);
+                    typeof msg === 'function' && (resolvedString += `${Colors['yellow'] + msg.toString()} `);
+                    typeof msg === 'object' && (resolvedString += `${Colors['red'] + msg.toString()} `);
+                    typeof msg === 'symbol' && (resolvedString += `${Colors['magenta'] + msg.toString()} `);
+                    typeof msg === 'undefined' && (resolvedString += `${Colors[color] + Colors['underscore'] + 'undefined'} `);
+                } catch (e) {
+                    resolvedString += e;
+                }
+            });
+            return resolvedString;
+
+        } else {
+            let resolvedString: string = '';
+            values.forEach((msg, i, arr) => {
+                try {
+                    typeof msg === 'string' && (resolvedString += `${Colors.Filtered['blue'] + msg} `);
+                    typeof msg === 'number' && (resolvedString += `${Colors.Filtered['green'] + msg.toString()} `);
+                    typeof msg === 'boolean' && (resolvedString += `${Colors.Filtered['green'] + msg} `);
+                    typeof msg === 'bigint' && (resolvedString += `${Colors.Filtered['green'] + msg.toString()} `);
+                    typeof msg === 'function' && (resolvedString += `${Colors.Filtered['yellow'] + msg.toString()} `);
+                    typeof msg === 'object' && (resolvedString += `${Colors.Filtered['red'] + msg.toString()} `);
+                    typeof msg === 'symbol' && (resolvedString += `${Colors.Filtered['magenta'] + msg.toString()} `);
+                    typeof msg === 'undefined' && (resolvedString += `${Colors.Filtered['blue'] + Colors.Filtered['underscore'] + 'undefined'} `);
+                } catch (e) {
+                    resolvedString += e;
+                }
+            });
+
+            return resolvedString;
         };
     }
-}
 
-interface propTime {
-    hours: number | string;
-    minutes: number | string;
-    seconds: number | string;
-}
-
-class ConsoleUtils {
-    options: Params;
-    constructor (params?: Params) {
-        if (params) this.options = params; else this.options = {}
-    }
-    /**
-     * Returna el estado de la memoria RAM en MB despues de que se llame cualquier funcion de impresion
-     */
-    public memory: number = 0;
-    protected groupTab: number = 0;
-    private _time: propTime = {
-        hours: 0,
-        minutes: 0,
-        seconds: 0
-    };
-
-    protected _printStdOut(firstMessage: string, ...optionalMessages: Array<string>) {
-        //PROCESADO DE GRUPOS
-        let tabsToDo: string = ''
-        let countTab: number = 0;
-        for (let i = 0; i < this.groupTab; i++) {
-            tabsToDo += ' ';
-        }
-
-        //PROCESADO DE FECHA-HORA
-        let dateToDo: string = ''
-        if (this.options.options?.dated) {
-            dateToDo = this._makeADate();
-        }
-
-        let concated = tabsToDo;
-        stdout.write(concated + firstMessage + this._makeADate() + ' ' + optionalMessages.join(' ') + '\n');
+    protected _sendToSockets(method: 'in' | 'out' | 'err', msg: string) {
+        this.config.socketIO?.emit(`console:${method}`, msg);
+        this.config.websocket?.send(msg);
     }
 
-    protected _printStdErr(firstMessage: string, ...optionalMessages: Array<string>) {
-        let tabsToDo: string = ''
-        let countTab: number = 0;
-        for (let i = 0; i < this.groupTab; i++) {
-            tabsToDo += ' ';
-        }
+    protected async _printToConsole(color: keyof ConsoleFilteredColors, std: 'in' | 'out' | 'err', message: any, optMessage: any[]): Promise<void> {
+        let spaceGroups: string = ``;
+        let i: number = 0;
+        while (this._groups > i) { spaceGroups+= `  `; i++; }
 
-        let dateToDo: string = ''
-        if (this.options.options?.dated) {
-            dateToDo = this._makeADate();
-        }
+        const msg = `${spaceGroups}${new Time().build(this.config.time)}${message} `;
 
-        let concated = tabsToDo;
+        std === 'err' && (this.stdErr.write(Colors[color] + msg + this._resolveTypeOfColor(optMessage, color, 'normal')  + '\n' + Colors.reset));
+        std === 'in' && (this.stdIn.write(Colors[color] + msg + this._resolveTypeOfColor(optMessage, color, 'normal')  + '\n' + Colors.reset));
+        std === 'out' && (this.stdOut.write(Colors[color] + msg + this._resolveTypeOfColor(optMessage, color, 'normal')  + '\n' + Colors.reset));
 
-        stderr.write(concated + firstMessage + this._makeADate() + ' ' + optionalMessages.join(' ') + '\n');
-        this._processMemory();
-    }
-
-    protected _processMemory() {
-        this.memory = Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100;
-    }
-
-    protected _stringingToPrint(param: any): string {
-        const typeParam = typeof param;
-
-        if (typeParam === 'string') return param; 
-        else if (typeParam === 'object') return this._objectToPrint(param);
-        else if (typeParam === 'number') return param.toString();
-        else if (typeParam === 'bigint') return param.toString();
-        else if (typeParam === 'boolean') if (param) return 'true'; else return 'false'; 
-        else if (typeParam === 'function') return this._objectToPrint(param);
-        else if (typeParam === 'symbol') return param.toString();
-        else if (typeParam === 'undefined') return 'undefined';
-        else return 'undefined';
-    }
-
-    /**
-     * @param {object} param
-     */
-    protected _objectToPrint(param: object | Array<any>): string {
-        return param.toString();
-    }
-
-    protected _makeADate() {
-        let _date = new Date();
-        if (typeof this._time !== 'object') return `[ERR:ERR:ERR]`
-        this._time.hours = _date.getHours();
-        this._time.minutes = _date.getMinutes();
-        this._time.seconds = _date.getSeconds();
-
-        if (this._time.hours <= 9) this._time.hours = `0${this._time.hours}`;
-        if (this._time.minutes <= 9) this._time.minutes = `0${this._time.minutes}`;
-        if (this._time.seconds <= 9) this._time.seconds = `0${this._time.seconds}`;
-
-        return `[${this._time.hours}:${this._time.minutes}:${this._time.seconds}]`;
+        this._sendToSockets(std, Colors.Filtered[color] + msg + this._resolveTypeOfColor(optMessage, color, 'filtered') + Colors.Filtered.reset);
+        this._fileStream?.write(Colors.Filtered[color] + msg + this._resolveTypeOfColor(optMessage, color, 'filtered') + '\n' + Colors.Filtered.reset);
+        this._readMemory();
     }
 }
 
-class Console extends ConsoleUtils {
-    params?: Params;
-    constructor(params?: Params) {
-        super(params);
-        this.params = params;
+export class Console extends ConsoleUtil {
+    constructor(config?: ConsoleConfig) {
+        super(config);
     }
 
     /**
-     * Imprime en la consola el mensaje con un salto de linea
-     * @color Comun
-     * @param {any} message
-     * @param {Array<any>} optional
+     * @color Blue/Classic
+     * @description Imprime en la consola los argumentos enviados en color Azul
      */
-    public log(message: any, ...optional: Array<any>): void {
-        const __message = this._stringingToPrint(message);
-        
-        this._printStdOut(SrTools.colors('blue'), __message, ...optional);
+    public log(msg: any, ...optMessage: any[]) {
+        this._printToConsole('blue', 'out', msg, optMessage);
     }
 
     /**
-     * Filtra e Imprime en la consola el mensaje con un salto de linea
-     * @color Comun
-     * @param {any} message
-     * @param {Array<string>} optional
+     * @color Blue/Classic
+     * @description Filtra palabras o simbolos (de un string) e imprime el resultado [solo funciona para el primer argumento]
      */
-    public send(message: any, ...optional: Array<any>) {
-        const __message = this._stringingToPrint(message);
-        
-        this._printStdOut(SrTools.colors('blue'), __message, ...optional);
+    public send(msg: any, ...optMessage: any[]) {
+        let messageFiltered = msg;
+        if (this.config.filter) {
+            this.config.filter.forEach((word, i, arr) => { 
+                messageFiltered.replace(new RegExp(word, 'gi'), ' ');
+            });
+        }
+        this._printToConsole('blue', 'out', msg, optMessage);
     }
 
-    /**
-     * Prints to stdout with a new line and show the JS line [non-common color]
-     * @param {any} args
-     */
-    public debug(message: any, ...optional: Array<string>) {
-        const __message = this._stringingToPrint(message);
-        
-        this._printStdOut(SrTools.colors('cyan'), __message, ...optional);
+    public warn(msg: any, ...optMessage: any[]) {
+        this._printToConsole('yellow', 'err', msg, optMessage);
     }
 
-    /**
-     * Prints Warnings to stderr with a new line [warn color]
-     * @param {any} args
-     */
-    public warn(message: any, ...optional: Array<string>) {
-        const __message = this._stringingToPrint(message);
-        
-        this._printStdErr(SrTools.colors('yellow'), __message, ...optional);
+    public debug(msg: any, ...optMessage: any[]) {
+        this._printToConsole('cyan', 'out', msg, optMessage);
     }
 
-    /**
-     * Prints Errors to stderr with a new line [error color]
-     * @param {any} args
-     */
-    public err(message: any, ...optional: Array<string>) {
-        const __message = this._stringingToPrint(message);
-        
-        this._printStdErr(SrTools.colors('red'), __message, ...optional);
+    public info(msg: any, ...optMessage: any[]) {
+        this._printToConsole('cyan', 'out', msg, optMessage);
     }
 
-    /**
-     * Prints Errors to stderr with a new line and exit procees with 500 [FError color] 
-     * @param {Error} arg
-     */
-    public fatalE(message: any) {
-        const __message = this._stringingToPrint(message);
-        
-        this._printStdErr(SrTools.colors('red'), __message);
+    public error(msg: any, ...optMessage: any[]) {
+        this._printToConsole('red', 'err', msg, optMessage);
     }
 
-    /**
-     * Prints a successful operation to stdout with a new line
-     * @param {Error} arg
-     */
-    public success(message: any, ...optional: any) {
-        const __message = this._stringingToPrint(message);
-        
-        this._printStdOut(SrTools.colors('green'), __message, ...optional);
+    public assert(msg: any, ...optMessage: any[]) {
+        this._printToConsole('white', 'err', msg, optMessage);
     }
 
-    /**
-     * WARNING: Dir functions isn't full implement on sr-console module
-     * @param {arg} opt 
-     * @param {any} args 
-     */
-    public dir(opt: Object, message: any, ...optional: any) {
-
+    public clear() {
+        this._printToConsole('reset', 'out', '\n\n\n\n\n\n\n\n\n\n\n\n\n', []);
     }
 
-    /**
-     * WARNING: Dir functions isn't full implement on sr-console module
-     * Real support for DIRXML (but why are you using XML if JSON exist?)
-     * @param {arg} opt 
-     * @param {any} args
-     * @deprecated Since 30 January
-     */
-    public dirxml(opt: Object, message: any, ...optional: any) {
-
+    public group(msg: any, ...optMessage: any[]) {
+        this._printToConsole('magenta', 'out', msg, optMessage);
+        this._groups++
     }
 
-    /**
-     * Prints a log message with a initial space and all new lines print a new-line message
-     * @param {any} args
-     */
-    public group(message: any, ...optional: any) {
-        const __message = this._stringingToPrint(message);
-        this.groupTab++;
-
-        this._printStdOut(SrTools.colors('magenta'), __message, ...optional);
+    public groupEnd(msg: any, ...optMessage: any[]) {
+        if (this._groups !== 0) this._groups--;
+        this._printToConsole('magenta', 'out', msg, optMessage);
     }
 
-    /**
-     * Prints a log message with a initial spacea and clear the group created before
-     * @param {any} args
-     */
-    public groupEnd(message: any, ...optional: any) {
-        const __message = this._stringingToPrint(message);
-        if (this.groupTab !== 0) this.groupTab--;
-        
-        this._printStdOut(SrTools.colors('magenta'), __message, ...optional);
+    public groupCollapsed(msg: any, ...optMessage: any[]) {
+        if (this._groups !== 0) this._groups--;
+        this._printToConsole('magenta', 'out', msg, optMessage);
     }
 
-    /**
-     * Prints 'Message' and a trace of the function
-     * @param {any} args
-     */
-    public trace(message: string, ...optional: any) {
-        const __message = this._stringingToPrint(message);
-        
-        this._printStdErr(SrTools.colors('red'), __message, ...optional);
+    public count() {
+        //SOON
     }
 
-    /**
-     * Prints a message verifies value is true (if is false do nothing) [white color]
-     * @param {any} value
-     * @param {string} message
-     * @param {any} args
-     */
-    public assert(value: any, message: string, ...optional: any) {
-        const __message = this._stringingToPrint(message);
-        
-        this._printStdOut(SrTools.colors('white'), __message, ...optional);
+    public countReset() {
+        //SOON
     }
 
-    /**
-     * Maintains an internal counter specific to `label` and outputs to stdout the number of times `count()` has been called with the given label.
-     * @param args 
-     */
-    public count(label: string) {
-
+    public dir() {
+        //SOON
     }
 
-    /**
-     * Resets the internal counter specific to `label`.
-     * @param {string} args 
-     */
-    public countReset(label: string) {
-
+    public dirxml() {
+        //SOON
     }
 
-    /**
-     * Starts a timer that can be used to compute the duration of an operation. Timers are identified by a unique label.
-     * @param {string} label 
-     */
-    public time(label?: string) {
-
+    public table() {
+        //SOON
     }
 
-    /**
-     * For a timer that was previously started by calling {@link console._time()}, prints the elapsed time and other data arguments to stdout.
-     * @param label 
-     */
-    public timeStamp(message: any, label?: string, ...optional: any) {
-
+    public time() {
+        //SOON
     }
 
-    /**
-     * Stops a timer that was previously started by calling {@link console._time()} and prints the result to stdout.
-     * @param label 
-     */
-    public timeEnd(label?: string) {
-
+    public timeEnd() {
+        //SOON
     }
 
-    /**
-    * WARNING: table function isn't full implement on sr-console module
-    */
-    public table(args: Object | Array<any>) {
-
+    public timeLog() {
+        //SOON
     }
 
-    /**
-     * WARNING: table function isn't full implement on sr-console module
-     * Well... microsoft. i make this function, now have sence to put this function in the type files
-     * @param {any} args
-     */
-    public exception(args: any) {
-
+    public timeStamp() {
+        //SOON
     }
+
+    public trace() {
+        //SOON
+    }
+
+    public profile() {
+        //SOON
+    }
+
+    public profileEnd() {
+        //SOON
+    }
+
+    public Console = Console
 }
 
 export default Console;
