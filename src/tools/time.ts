@@ -37,7 +37,7 @@ export class ConsoleTime extends Date {
         
         this.localHours = this.getHours();
         this.localMinutes = this.getMinutes();
-        this.localSeconds = this.getMinutes();
+        this.localSeconds = this.getSeconds();
         this.localMilliseconds = this.getMilliseconds();
     }
 
