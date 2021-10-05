@@ -1,0 +1,8 @@
+# ignore the .ts files
+./node_modules
+*.ts
+./src/test
+./logs.txt
+
+# include the .d.ts files
+!*.d.ts

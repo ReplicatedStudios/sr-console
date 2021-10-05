@@ -1,6 +1,12 @@
-node_modules
-funciones.txt
-test.js
-log.txt
-test-2.js
-.vscode
+# FOLDERS
+node_modules/
+src/test/
+
+# FILES
+src/*.tsbuildinfo
+*.txt
+
+**/*.js
+*.d.ts
+src/*.js
+src/*.d.ts
