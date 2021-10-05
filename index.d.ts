@@ -15,6 +15,12 @@ declare class SrConsole {
      * Se recomienda usar `this.global();` en lugar de `this.globalize();`
      */
     public globalize(): void
+
+    /**
+     * Almacena todo en la variable global con el nombre `consol.send('name');` y `console.send('name');`
+     * IMPORTANTE: No utilizar a menos que sepas lo que estas haciendo (o sabes lo que tu app este haciendo)
+     */
+    public dualGlobal(): void
 }
 
 declare global {

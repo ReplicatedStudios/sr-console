@@ -19,6 +19,13 @@ class SrConsole {
         global.Console = Console;
         this.ready = true;
     }
+
+    dualGlobal() {
+        if (this.ready) return;
+        global.console = global.consol = new Console(this.options);
+        global.Console = global.Consol = Console;
+        this.ready = true;
+    }
 }
 
 export default SrConsole;
