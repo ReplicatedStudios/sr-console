@@ -1,2 +1,11 @@
-node_modules
-logs.txt
+# FOLDERS
+node_modules/
+src/test/
+
+# FILES
+*.txt
+
+**/*.js
+*.d.ts
+src/*.js
+src/*.d.ts
