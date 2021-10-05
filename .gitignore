@@ -3,7 +3,7 @@ node_modules/
 src/test/
 
 # FILES
-src/tsconfig.tsbuildinfo
+src/*.tsbuildinfo
 *.txt
 
 **/*.js
