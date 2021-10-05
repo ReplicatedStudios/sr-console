@@ -8,8 +8,7 @@ export interface ConsoleConfig {
     dirname?: string;
     filter?: Array<string>;
     time?: keyof TimeBuildMethods;
-    socketIO?: SocketIO.Server;
-    websocket?: WebSocket;
+
 }
 
 class ConsoleUtil {
@@ -26,6 +25,7 @@ class ConsoleUtil {
     protected stdOut = stdout;
     protected stdErr = stderr;
     protected stdIn = stdin;
+    protected socketIO?: SocketIO.Server;
 
     protected _readMemory(): void {
         this.memory = Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100;
@@ -74,8 +74,7 @@ class ConsoleUtil {
     }
 
     protected _sendToSockets(method: 'in' | 'out' | 'err', msg: string) {
-        this.config.socketIO?.emit(`console:${method}`, msg);
-        this.config.websocket?.send(msg);
+        this.socketIO?.emit(`console:${method}`, msg);
     }
 
     protected async _printToConsole(color: keyof ConsoleFilteredColors, std: 'in' | 'out' | 'err', message: any, optMessage: any[]): Promise<void> {
@@ -98,6 +97,12 @@ class ConsoleUtil {
 export class Console extends ConsoleUtil {
     constructor(config?: ConsoleConfig) {
         super(config);
+    }
+
+    public SocketIO (server: SocketIO.Server): boolean {
+        this.socketIO = server;
+        if (this.socketIO.engine) return true;
+        else return false;
     }
 
     /**
@@ -138,6 +143,18 @@ export class Console extends ConsoleUtil {
         this._printToConsole('red', 'err', msg, optMessage);
     }
 
+    public err(msg: any, ...optMessage: any[]) {
+        this._printToConsole('red', 'err', msg, optMessage);
+    }
+
+    public success(msg: any, ...optMessage: any[]) {
+        this._printToConsole('green', 'out', msg, optMessage);
+    }
+
+    public FatalE(msg: Error) {
+        this._printToConsole('bg_white', 'out', Colors['red'] + msg, []);
+    }
+
     public assert(msg: any, ...optMessage: any[]) {
         this._printToConsole('white', 'err', msg, optMessage);
     }
@@ -161,50 +178,86 @@ export class Console extends ConsoleUtil {
         this._printToConsole('magenta', 'out', msg, optMessage);
     }
 
+    /**
+     * @private
+     */
     public count() {
         //SOON
     }
 
+    /**
+     * @private
+     */
     public countReset() {
         //SOON
     }
 
+    /**
+     * @private
+     */
     public dir() {
         //SOON
     }
 
+    /**
+     * @private
+     */
     public dirxml() {
         //SOON
     }
 
+    /**
+     * @private
+     */
     public table() {
         //SOON
     }
 
+    /**
+     * @private
+     */
     public time() {
         //SOON
     }
 
+    /**
+     * @private
+     */
     public timeEnd() {
         //SOON
     }
 
+    /**
+     * @private
+     */
     public timeLog() {
         //SOON
     }
 
+    /**
+     * @private
+     */
     public timeStamp() {
         //SOON
     }
 
+    /**
+     * @private
+     */
     public trace() {
         //SOON
     }
 
+    /**
+     * @private
+     */
     public profile() {
         //SOON
     }
 
+    /**
+     * @private
+     */
     public profileEnd() {
         //SOON
     }
