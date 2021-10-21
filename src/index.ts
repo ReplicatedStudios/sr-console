@@ -262,7 +262,6 @@ export class Console extends ConsoleUtil {
         //SOON
     }
 
-    public Console = Console
 }
 
 export default Console;

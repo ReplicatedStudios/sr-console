@@ -15,7 +15,7 @@
   "author": "Voxelated Software",
   "license": "MIT",
   "publishConfig": {
-    "registry":"https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
     "@types/node": "^16.10.2",
