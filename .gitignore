@@ -5,6 +5,7 @@ src/test/
 # FILES
 src/*.tsbuildinfo
 *.txt
+.npmrc
 
 **/*.js
 *.d.ts
