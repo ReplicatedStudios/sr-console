@@ -1,79 +1,82 @@
-# SrConsole | UNA CONSOLA MAS COLORIDA
+# SRCONSOLE - PODEROSA CONSOLA
 Una libreria que le da mas color a la consola de tu aplicacion para que sea facilmente comprensible, incluyendo herramientas utiles.
+Bastante poderosa y requiere poca configuracion. Deja atras el complicarte en leer archivos de Log de tu codigo o saber cuando ocurrio el error, ahora puedes tener todo mas organizado y facil de
+previsualizar
 
-### AVISO
-EL MODULO ESTA EN FASE BETA-TS (MIGRADO A TS)
 
-## INICIO
-Configuracion inicial
-```js
+### = ESTADO BETA =
+`El modulo aun se encuentra en fase BETA, puede presentar pequeños fallos controlados`
+
+## INICIALIZACION
+Commonjs
+```ts
+new require('sr-console')(__dirname, ["token_a_esconder", "bad_word"], "simple");
+
+//ALTERNATIVA
 const SrConsole = require('sr-console');
-
-new SrConsole({
-    dirname: process.cwd(), // UBICACION DE `logs.txt`
-    filter: [               //ARRAY CON PALABRAS CLAVES A CENSURAR
-        "secret_token_no_loggable",
-        "i hate bananas"
-    ],
-    time: 'simple' //Formato de fecha
-}).global();
+new SrConsole(__dirname, ['token_a_esconder', 'nword'], 'simple')
 ```
-# Limitaciones
-Typescript limita mucho el sobreescribir los tipos de la variable `Console`
-Por lo que se implemento 2 metodos global para almacenarlo en la variable global con nombres diferentes
+ES6 / ESNEXT
+```ts
+import SrConsole from "sr-console";
 
-Recomiendo usar `.global()` en lugar de `.globalize();`
-
-EJEMPLO:
-```js
-new SrConsole().global(); //Almacena en la variable consol los metodos y es compatible con TS
-new SrConsole().globalize(); //Almacena en la variable console los metodos pero es incompatible con TS
+new SrConsole(process.cwd(), ["token_a_esconder", "bad_word"], "simple");
 ```
-
 ## FUNCIONES BASICAS
 La libreria cuenta con casi todas las funciones que existen en la clase `Console` original.
 Aqui un ejemplo de todas las funciones con los colores que muestran y los valores que returnan
 ```js
-consol.send('Hola enorme terrible y abominable Mundo!'); // [00:28:46] Hola enorme y Mundo! - Azul
-consol.log('Hola Mundo'); // [00:28:46] Hola Mundo - Azul
-consol.warn('Hola Peligroso Mundo'); // [00:28:46] Hola Peligroso Mundo - Amarillo
-consol.debug('Hola problematico mundo'); // [00:28:46] Hola problematico mundo - Celeste
-consol.err('Hola Erroneo Mundo'); // [00:28:46] Hola Erroneo Mundo - Rojo
-consol.error('Hola alias de Erroneo Mundo'); // [00:28:46] Hola alias de Erroneo Mundo - Rojo
-consol.success('Hola exitoso mundo'); // [00:28:46] Hola exitoso mundo - Verde
-consol.trace('Hola guiado mundo'); // Trace: [00:28:46] Hola guiado mundo at... - Fondo rojo / Amarillo
-consol.group("Hola Agrupado Mundo!") // [00:28:46] Hola Agrupado mundo - Magenta
+console.send('Hola enorme terrible y abominable Mundo!'); // [00:28:46] Hola enorme y Mundo! - Azul
+console.log('Hola Mundo'); // [00:28:46] Hola Mundo - Azul
+console.warn('Hola Peligroso Mundo'); // [00:28:46] Hola Peligroso Mundo - Amarillo
+console.debug('Hola problematico mundo'); // [00:28:46] Hola problematico mundo - Celeste
+console.err('Hola Erroneo Mundo'); // [00:28:46] Hola Erroneo Mundo - Rojo
+console.error('Hola alias de Erroneo Mundo'); // [00:28:46] Hola alias de Erroneo Mundo - Rojo
+console.success('Hola exitoso mundo'); // [00:28:46] Hola exitoso mundo - Verde
+console.trace('Hola guiado mundo'); // Trace: [00:28:46] Hola guiado mundo at... - Fondo rojo / Amarillo
+console.group("Hola Agrupado Mundo!") // [00:28:46] Hola Agrupado mundo - Magenta
 
 setTimeout(() => {
-    consol.fatalError(new Error('Errores graves').stack); // [00:28:46] Error: Errores graves - Fondo rojo / Amarillo
+    console.fatalError(new Error('Errores graves').stack); // [00:28:46] Error: Errores graves - Fondo rojo / Amarillo
 }, 2000)
 ```
 
 ## UTILIDADES
-La libreria no solo cambia de color los logs y les agrega hora, si no tambien cuenta con utilidades como el "Almacenamiento de Logs" y la emision de estos usando Websockets
+Principales funciones del modulo
+- Agregar Dia y hora | **LISTO**
+- Colorear logs respectivamente la funcion | **LISTO**
+- Emitir consola via Websockets | **LISTO**
+- Calcular uso de memoria cada console.any(); | **LISTO**
+- Permitir Objetos Circulares
+- Dar formato automatico a objetos
+- Guardar los registros en un archivo dentro del proyecto | **LISTO**
+- Filtrar palabras que no deberian verse en los logs | **CON BUGS**
+- Colorizar tipo de datos en 1 sola linea .log('Numero:', 1) | **LISTO**
+- Si desea aportar una utilidad importante abrir un [issue](https://github.com/Zixasis/sr-console/issues) en Github
+- Convertir string a color a elemento HTML con estilo | **CON BUGS**
 
 
-# Ejemplo de Websocket [SOCKET.IO](https://www.npmjs.com/package/socket.io)
+# SR-CONSOLE x [SOCKET.IO](https://www.npmjs.com/package/socket.io)
 Instaciamos nuestra consola y creamos nuestro servidor websocket, despues usamos la funcion `.SocketIO()` y le agregamos como parametro el servidor websocket
 ```js
 const SocketIO = require('socket.io');
 const io = SockeIO();
 
-consol.SocketIO(io);
+console.SocketIO(io);
 ```
 
 Para escuchar nuevas entradas en la consola solo debemos usar la siguiente linea de codigo.
 ```js
-    socket.on('console:out', data => {
-        // OUTPUTS NORMALES
-    });
-    socket.on('console:in', data => {
-        // OUTPUTS DE ENTRADA
-    });
-    socket.on('console:err', data => {
-        // OUTPUTS DE ERROR
-    });
+socket.on('console:out', data => {
+    // OUTPUTS NORMALES
+});
+socket.on('console:in', data => {
+    // OUTPUTS DE ENTRADA
+});
+socket.on('console:err', data => {
+    // OUTPUTS DE ERROR
+});
 ```
 
 ## EN DESARROLLO
-Aun estoy trabajando en la libreria. por lo que estare haciendo cambios bastante bruscos en el codigo y en como se redacta con cada cambio realizado hasta que finalice la version 1.0.0. En caso de que la libreria presente algun problema puedes visitar el [Repositorio](https://github.com/Zixasis/sr-console#readme)
+Aun estoy trabajando en la libreria. por lo que estare haciendo cambios bastante bruscos en el codigo y en como se redacta con cada cambio realizado hasta que finalice la version ``1.0.0`` En caso de que la libreria presente algun problema puedes visitar el [Repositorio](https://github.com/Zixasis/sr-console#readme)
