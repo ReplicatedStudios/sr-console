@@ -1,6 +1,6 @@
 {
   "name": "sr-console",
-  "version": "0.14.0-BETA",
+  "version": "0.14.1-BETA",
   "description": "Modulo mejorado de la consola de node.js",
   "main": "./build/index.js",
   "scripts": {
@@ -11,14 +11,6 @@
     "Node.Console",
     "VoxelatedHost"
   ],
-  "compilerOptions": {
-    "module": "ESNext"
-  },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "ESNext"
-    }
-  },
   "type": "commonjs",
   "author": "Voxelated Software",
   "license": "MIT",
