@@ -1,15 +1,8 @@
 # FOLDERS
 node_modules/
 src/test/
-test/
+build
 
 # FILES
-src/*.tsbuildinfo
+**/*.tsbuildinfo
 *.txt
-.npmrc
-
-**/*.js
-**.map
-*.d.ts
-src/*.js
-src/*.d.ts
