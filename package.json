@@ -19,7 +19,7 @@
       "module": "ESNext"
     }
   },
-  "type": "module",
+  "type": "commonjs",
   "author": "Voxelated Software",
   "license": "MIT",
   "dependencies": {
