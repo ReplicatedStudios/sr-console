@@ -1,6 +1,7 @@
 # FOLDERS
 node_modules/
 src/test/
+test/
 
 # FILES
 src/*.tsbuildinfo
@@ -8,6 +9,7 @@ src/*.tsbuildinfo
 .npmrc
 
 **/*.js
+**.map
 *.d.ts
 src/*.js
 src/*.d.ts

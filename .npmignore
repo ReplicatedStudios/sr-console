@@ -3,6 +3,7 @@
 *.ts
 ./src/test
 ./logs.txt
+./test
 
 # include the .d.ts files
 !*.d.ts

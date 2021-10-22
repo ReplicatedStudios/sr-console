@@ -13,10 +13,10 @@ const Months = [
     'Dec',
 ];
 
-export interface TimeBuildMethods {
-    full: string;
-    half: string;
-    simple: string;
+export interface TimeMethod {
+    long: string;
+    short: string;
+    basic: string;
     none: null;
 }
 
@@ -41,20 +41,20 @@ export class ConsoleTime extends Date {
         this.localMilliseconds = this.getMilliseconds();
     }
 
-    public build(method?: keyof TimeBuildMethods): string {
+    public build(method?: keyof TimeMethod): string {
         switch (method) {
             case('none'):
                 return ''
             break;
-            case('full'):
+            case('long'):
                 return `<${Months[this.localMonth]} ${this.localDays <= 9 ? '0' + this.localDays : this.localDays}, ${this.localYear}> [${this.localHours <= 9 ? '0' + this.localHours : this.localHours}:${this.localMinutes <= 9 ? '0' + this.localMinutes : this.localMinutes}:${this.localSeconds <= 9 ? '0' + this.localSeconds : this.localSeconds}.${this.localMilliseconds}]: `;
             break;
 
-            case('half'):
+            case('short'):
                 return `<${Months[this.localMonth]} ${this.localDays <= 9 ? '0' + this.localDays : this.localDays}> [${this.localHours <= 9 ? '0' + this.localHours : this.localHours}:${this.localMinutes <= 9 ? '0' + this.localMinutes : this.localMinutes}:${this.localSeconds <= 9 ? '0' + this.localSeconds : this.localSeconds}]: `;
             break;
 
-            case('simple'):
+            case('basic'):
             default:
                 return `[${this.localHours <= 9 ? '0' + this.localHours : this.localHours}:${this.localMinutes <= 9 ? '0' + this.localMinutes : this.localMinutes}:${this.localSeconds <= 9 ? '0' + this.localSeconds : this.localSeconds}]: `;
             break;

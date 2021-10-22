@@ -1,26 +1,43 @@
-# SRCONSOLE - PODEROSA CONSOLA
+# LOS MODALES HACEN A LA CONSOLA
 Una libreria que le da mas color a la consola de tu aplicacion para que sea facilmente comprensible, incluyendo herramientas utiles.
 Bastante poderosa y requiere poca configuracion. Deja atras el complicarte en leer archivos de Log de tu codigo o saber cuando ocurrio el error, ahora puedes tener todo mas organizado y facil de
 previsualizar
 
 
-### = ESTADO BETA =
-`El modulo aun se encuentra en fase BETA, puede presentar pequeños fallos controlados`
+### ``MODULO EN BETA``
+
+### = CHANGELOG 0.13.0 - BETA =
+- Si tienes un `.env` ya no necesitas importar [dotenv](https://www.npmjs.com/package/dotenv)
+  - Ahora [dotenv](https://www.npmjs.com/package/dotenv) es una dependencia que se ejecuta apenas importes `sr-console` a tu proyecto
+  - Las configuraciones de `sr-console` ahora van incluidas en el `.env`
+- Ya no es necesario instanciar `SrConsole` para que surta efecto
+  - Esto soluciona un bug donde si ejecutabas antes de instanciar `SrConsole()` usaba la variable original
+  - Ahora solo necesitas importar `sr-console` y configurarlo desde tu `.env`
+- Se ha parchado un bug en `console.send()` que no filtraba realmente las palabras establecidas
+- `dirname` ya no es requerido. Se usara como ruta por defecto el resultado de `process.cwd()`
+- Los valores de `time` fueron actualizados
+  - Ahora son: `long` | `short` | `basic` | `none`
 
 ## INICIALIZACION
 Commonjs
 ```ts
-new require('sr-console')(__dirname, ["token_a_esconder", "bad_word"], "simple");
-
-//ALTERNATIVA
-const SrConsole = require('sr-console');
-new SrConsole(__dirname, ['token_a_esconder', 'nword'], 'simple')
+require('sr-console');
 ```
 ES6 / ESNEXT
 ```ts
-import SrConsole from "sr-console";
+import "sr-console";
+```
+Archivo `.env` de tu Proyecto
+```env
+# Filtro de palabras/claves en .send(). Separados con el simbolo "|" - DEFAULT 
+SR_CONSOLE_FILTER="bad word|nword"
 
-new SrConsole(process.cwd(), ["token_a_esconder", "bad_word"], "simple");
+# Formato de fecha y hora al inicio de cada log
+# long | short | basic | none - DEFAULT: simple
+SR_CONSOLE_TIME=short
+
+# Activar registro de logs en la carpeta de tu proyecto - DEFAULT: false
+SR_CONSOLE_LOG=true
 ```
 ## FUNCIONES BASICAS
 La libreria cuenta con casi todas las funciones que existen en la clase `Console` original.
@@ -38,6 +55,7 @@ console.group("Hola Agrupado Mundo!") // [00:28:46] Hola Agrupado mundo - Magent
 
 setTimeout(() => {
     console.fatalError(new Error('Errores graves').stack); // [00:28:46] Error: Errores graves - Fondo rojo / Amarillo
+    console.ferror() /* ALIAS */
 }, 2000)
 ```
 
@@ -50,10 +68,10 @@ Principales funciones del modulo
 - Permitir Objetos Circulares
 - Dar formato automatico a objetos
 - Guardar los registros en un archivo dentro del proyecto | **LISTO**
-- Filtrar palabras que no deberian verse en los logs | **CON BUGS**
+- Filtrar palabras que no deberian verse en los logs | **LISTO**
 - Colorizar tipo de datos en 1 sola linea .log('Numero:', 1) | **LISTO**
-- Si desea aportar una utilidad importante abrir un [issue](https://github.com/Zixasis/sr-console/issues) en Github
 - Convertir string a color a elemento HTML con estilo | **CON BUGS**
+- Si desea aportar una utilidad importante abrir un [issue](https://github.com/Zixasis/sr-console/issues) en Github
 
 
 # SR-CONSOLE x [SOCKET.IO](https://www.npmjs.com/package/socket.io)
@@ -77,6 +95,20 @@ socket.on('console:err', data => {
     // OUTPUTS DE ERROR
 });
 ```
+
+# SR-CONSOLE x [DOTENV](https://www.npmjs.com/package/dotenv)
+Al usar `sr-console` ya no necesitas importar la libreria [dotenv](https://www.npmjs.com/package/dotenv), `sr-console` lo hace por ti.
+#### Limitaciones
+- No puedes cambiar la configuracion
+  - Se usara la por defecto de [dotenv](https://www.npmjs.com/package/dotenv)
+- No estan las utilidades para convertir elementos `.env` dentro del codigo a `Object()`
+
+## PROXIMO A ACTUALIZAR
+- Documentar correctamente las funciones
+- Corregir error al convertir el unicode de color a elemntos HTML
+- Resolver problemas de rendimiento al ejecutar ciertas funciones
+- Implementar `EventEmitter` como herramienta [ahorrar codigo]
+- Finalizar funciones default de la clase original `Console`
 
 ## EN DESARROLLO
 Aun estoy trabajando en la libreria. por lo que estare haciendo cambios bastante bruscos en el codigo y en como se redacta con cada cambio realizado hasta que finalice la version ``1.0.0`` En caso de que la libreria presente algun problema puedes visitar el [Repositorio](https://github.com/Zixasis/sr-console#readme)

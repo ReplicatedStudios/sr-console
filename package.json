@@ -1,22 +1,29 @@
 {
   "name": "sr-console",
-  "version": "0.12.1-BETA",
+  "version": "0.13.0-BETA",
   "description": "Modulo mejorado de la consola de node.js",
-  "main": "./index.js",
+  "main": "./build/index.js",
   "scripts": {
-    "debug": "node i.js"
+    "test:basic": "tsc && node testing/basic.js"
   },
   "keywords": [
     "Console",
     "Node.Console",
     "VoxelatedHost"
   ],
+  "compilerOptions": {
+    "module": "ESNext"
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "ESNext"
+    }
+  },
   "type": "module",
   "author": "Voxelated Software",
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^16.10.2",
-    "@types/socket.io": "^3.0.2",
+    "dotenv": "^10.0.0",
     "socket.io": "^4.2.0"
   },
   "repository": {
@@ -30,5 +37,10 @@
   "os": [
     "win32",
     "linux"
-  ]
+  ],
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/node": "^16.11.3",
+    "@types/socket.io": "^3.0.2"
+  }
 }
