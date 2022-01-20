@@ -114,7 +114,7 @@ export class SrConsole extends SrConsoleUtil {
     }
 
     /**
-     * @color Blue/Classic
+     * @color Azul/Clasico
      * @description Imprime en la consola los argumentos enviados en color Azul
      */
     public log(msg: any, ...optMessage: any[]) {
@@ -122,7 +122,7 @@ export class SrConsole extends SrConsoleUtil {
     }
 
     /**
-     * @color Blue/Classic
+     * @color Azul/Clasico
      * @description Filtra palabras o simbolos (de un string) e imprime el resultado [solo funciona para el primer argumento]
      */
     public send(msg: string, ...optMessage: any[]) {
@@ -135,22 +135,42 @@ export class SrConsole extends SrConsoleUtil {
         this._printToConsole('blue', 'out', msgClean, optMessage);
     }
 
+    /**
+     * @color Amarillo/Clasico
+     * @description Envia un mensaje a stderr con color amarillo
+     */
     public warn(msg: any, ...optMessage: any[]) {
         this._printToConsole('yellow', 'err', msg, optMessage);
     }
 
+    /**
+     * @color Celeste/Clasico
+     * @description Envia un mensaje a stdout con color celeste
+     */
     public debug(msg: any, ...optMessage: any[]) {
         this._printToConsole('cyan', 'out', msg, optMessage);
     }
 
+    /**
+     * @color Azul/Profundo
+     * @description Envia un mensaje a stdout con color azul profundo
+     */
     public info(msg: any, ...optMessage: any[]) {
         this._printToConsole('cyan', 'out', msg, optMessage);
     }
 
+    /**
+     * @color Rojo/Clasico
+     * @description Envia un mensaje de error o un Error con color Rojo
+     */
     public error(msg: any, ...optMessage: any[]) {
         this._printToConsole('red', 'err', msg, optMessage);
     }
 
+    /**
+     * @color Rojo/Clasico
+     * @description Alias de `console.error();`
+     */
     public err(msg: any, ...optMessage: any[]) {
         this._printToConsole('red', 'err', msg, optMessage);
     }

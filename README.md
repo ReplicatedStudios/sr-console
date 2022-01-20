@@ -6,17 +6,9 @@ previsualizar
 
 ### ``MODULO EN BETA``
 
-### = CHANGELOG 0.13.0 - BETA =
-- Si tienes un `.env` ya no necesitas importar [dotenv](https://www.npmjs.com/package/dotenv)
-  - Ahora [dotenv](https://www.npmjs.com/package/dotenv) es una dependencia que se ejecuta apenas importes `sr-console` a tu proyecto
-  - Las configuraciones de `sr-console` ahora van incluidas en el `.env`
-- Ya no es necesario instanciar `SrConsole` para que surta efecto
-  - Esto soluciona un bug donde si ejecutabas antes de instanciar `SrConsole()` usaba la variable original
-  - Ahora solo necesitas importar `sr-console` y configurarlo desde tu `.env`
-- Se ha parchado un bug en `console.send()` que no filtraba realmente las palabras establecidas
-- `dirname` ya no es requerido. Se usara como ruta por defecto el resultado de `process.cwd()`
-- Los valores de `time` fueron actualizados
-  - Ahora son: `long` | `short` | `basic` | `none`
+### = CHANGELOG 0.14.2 - BETA =
+- Se implemento soporte a ES5/commonjs ( ``require('module')``) y a su vez soporte a ESNext (``import 'module'``)
+- Correccion de errores menores y mejoras en el codigo
 
 ## INICIALIZACION
 Commonjs

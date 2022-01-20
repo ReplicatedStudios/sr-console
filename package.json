@@ -1,8 +1,9 @@
 {
   "name": "sr-console",
-  "version": "0.14.1-BETA",
+  "version": "0.14.2-BETA",
   "description": "Modulo mejorado de la consola de node.js",
   "main": "./build/index.js",
+  "module": "./module/index.js",
   "scripts": {
     "test:basic": "tsc && node testing/basic.js"
   },
