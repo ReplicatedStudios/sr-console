@@ -12,12 +12,13 @@
     "Node.Console",
     "VoxelatedHost"
   ],
-  "type": "commonjs",
+  "type": "module",
   "author": "Voxelated Software",
   "license": "MIT",
   "dependencies": {
     "dotenv": "^10.0.0",
-    "socket.io": "^4.2.0"
+    "socket.io": "^4.2.0",
+    "@types/socket.io": "^3.0.2"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,6 @@
   ],
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
-    "@types/node": "^16.11.3",
-    "@types/socket.io": "^3.0.2"
+    "@types/node": "^16.11.3"
   }
 }

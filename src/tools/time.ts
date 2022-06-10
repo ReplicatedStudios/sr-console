@@ -1,68 +1,47 @@
-const Months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-];
-
-export interface TimeMethod {
-    long: string;
-    short: string;
-    basic: string;
-    none: null;
-}
-
-export class ConsoleTime extends Date {
-    localDays: number;
-    localMonth: number;
-    localYear: number;
-    localHours: number;
-    localMinutes: number;
-    localSeconds: number;
-    localMilliseconds: number;
-    constructor() {
+export default class SrTime extends Date {
+    public static FORMAT_DATE_BASIC: number = 0;
+    public static FORMAT_DATE_SHORT: number = 1;
+    public static FORMAT_DATE_LONG: number = 2;
+    public static FORMAT_DATE_NONE: number = 3;
+    public MONTHS: string[] = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    private format: number;
+    constructor(format: number) {
         super();
-
-        this.localDays = this.getDay();
-        this.localMonth = this.getMonth();
-        this.localYear = this.getFullYear();
-        
-        this.localHours = this.getHours();
-        this.localMinutes = this.getMinutes();
-        this.localSeconds = this.getSeconds();
-        this.localMilliseconds = this.getMilliseconds();
+        this.format = format;
     }
 
-    public build(method?: keyof TimeMethod): string {
-        switch (method) {
-            case('none'):
-                return ''
+    override toString(): string {
+        const T = {
+            year: this.getFullYear(),
+            months: this.getMonth(),
+            days: this.getDay(),
+            hours: this.getHours(),
+            min: this.getMinutes(),
+            sec: this.getSeconds()
+        }
+        switch (this.format) {
+            case SrTime.FORMAT_DATE_NONE: 
+                return "";
             break;
-            case('long'):
-                return `<${Months[this.localMonth]} ${this.localDays <= 9 ? '0' + this.localDays : this.localDays}, ${this.localYear}> [${this.localHours <= 9 ? '0' + this.localHours : this.localHours}:${this.localMinutes <= 9 ? '0' + this.localMinutes : this.localMinutes}:${this.localSeconds <= 9 ? '0' + this.localSeconds : this.localSeconds}.${this.localMilliseconds}]: `;
+            case SrTime.FORMAT_DATE_LONG:
+                return `[${this.MONTHS[T.months]} ${T.days <= 9 ? '0' + T.days : T.days}, ${T.year}] [${T.hours <= 9 ? '0' + T.hours : T.hours}:${T.min <= 9 ? '0' + T.min : T.min}:${T.sec <= 9 ? '0' + T.sec : T.sec}]: `;
             break;
 
-            case('short'):
-                return `<${Months[this.localMonth]} ${this.localDays <= 9 ? '0' + this.localDays : this.localDays}> [${this.localHours <= 9 ? '0' + this.localHours : this.localHours}:${this.localMinutes <= 9 ? '0' + this.localMinutes : this.localMinutes}:${this.localSeconds <= 9 ? '0' + this.localSeconds : this.localSeconds}]: `;
+            case SrTime.FORMAT_DATE_SHORT:
+                return `[${this.MONTHS[T.months]} ${T.days <= 9 ? '0' + T.days : T.days}] [${T.hours <= 9 ? '0' + T.hours : T.hours}:${T.min <= 9 ? '0' + T.min : T.min}:${T.sec <= 9 ? '0' + T.sec : T.sec}]: `;
             break;
 
-            case('basic'):
+            case SrTime.FORMAT_DATE_BASIC:
             default:
-                return `[${this.localHours <= 9 ? '0' + this.localHours : this.localHours}:${this.localMinutes <= 9 ? '0' + this.localMinutes : this.localMinutes}:${this.localSeconds <= 9 ? '0' + this.localSeconds : this.localSeconds}]: `;
+                return `[${T.hours <= 9 ? '0' + T.hours : T.hours}:${T.min <= 9 ? '0' + T.min : T.min}:${T.sec <= 9 ? '0' + T.sec : T.sec}]: `;
             break;
         }
-
     }
 }
 
-const Time = ConsoleTime;
-
-export default Time;
+export interface SrTimeOpt {
+    FORMAT_DATE_BASIC: number;
+    FORMAT_DATE_SHORT: number;
+    FORMAT_DATE_LONG: number;
+    FORMAT_DATE_NONE: number;
+}
