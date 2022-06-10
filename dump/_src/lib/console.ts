@@ -1,43 +1,79 @@
-import fs from "fs";
-import path from "path";
-import { stderr, stdout, stdin } from "process";
+/* LIBRERIAS */
+import { WriteStream, createWriteStream } from "fs";
+import ph from "path";
+import { stderr, stdout, stdin, cwd } from "process";
 import IO from "socket.io";
+import { Console } from "console";
 
-/* MY SHIT */
-import SrTime, { SrTimeOpt } from "../tools/time.js";
-import SrColors, { SrColorsOpt } from "../tools/colors.js";
+/* UTILIDADES */
+import SrTime, {SrTimeMatch} from "../tools/time.js";
+import SrColors, { SrColorsMatch } from "../tools/colors.js";
 
-/* MY SHIT BUT ABSTRACT */
-interface SrConsoleConfig { unwords: string[]; time: keyof SrTimeOpt; log?: { active: boolean, path: string, filename: string } }
+/* MODELOS (o lo que sea) */
+import Config from '../tools/config.js';
+import Print from "../tools/print.js";
+import {config} from "dotenv";
 
-export default class SrConsole {
-    private static _config: SrConsoleConfig = {
-        unwords: [""],
-        time: "FORMAT_DATE_SHORT",
-        log: {
-            active: true,
-            path: "/logs",
-            filename: "app.txt"
+export default class SrConsole extends Console {
+    //DEFAULT CLASS EXPORT
+    public static readonly Config: typeof Config = Config;
+    public static readonly Print: typeof Print = Print;
+    public static readonly Time: typeof SrTime = SrTime;
+    public static readonly Colors: typeof SrColors = SrColors;
+
+    //CONFIG
+    readonly #config: Config;
+    readonly #fileSrt?: WriteStream | undefined;
+    static #space: number = 0;
+    /**
+     * Muestra el uso de RAM obtenido tras el ultimo `console.method();`
+     */
+    static memory = 0;
+    static #counts: { [i: string]: number } = {
+        default: 0,
+    }
+    static _gspace: any;
+
+    /**
+     * Crea una nueva instancia de Sr-console
+     *
+     * Aunque la configuracion sea dinamica (por objeto instanciado) el entorno es estatico. 
+     * Por lo que puede presentar problemas al usar `console.group()` o `console.count(label: string);`
+     * 
+     * Uselo manualmente bajo su propio riesgo
+     * @since v0.2.0
+     */
+    constructor(c: Config) {
+        super(stdout, stderr, false);
+
+        this.#config = c;
+        this.#fileSrt = this.#config.FILE.ACTIVE ? createWriteStream(ph.join(cwd(), this.#config.FILE.PATH, this.#config.FILE.NAME), "utf-8") : undefined;
+    }
+
+    //STATIC PRINTER
+    static #overPrint(p: Print) {
+        const out = `${SrColors[p.CL]}${new SrTime(p.CG.TIME)} ${p.VL.join(" ")} ${SrColors["T_RESET"]}\n`
+
+        switch(p.STD) {
+            case "OUT": return stdout.write(out);
+            case "ERR": return stderr.write(out);
+            default: throw new Error("Not specified a STD:OUT or STD:ERR output var in SrConsole.Print");
         }
-    };
+    }
 
-    private static _fileW = SrConsole._config.log?.active 
-        ? fs.createWriteStream(path.join(process.cwd(), SrConsole._config.log.path, SrConsole._config.log.filename), "utf-8") 
-        : undefined;
-
-    private static printing(c: keyof SrColorsOpt, ...v: any[]) {
-        const stringW = `${SrColors[c]}${new SrTime(SrTime.FORMAT_DATE_BASIC).toString()} ${v.join(" ")} \n`;
+    private static printing(c: SrColorsMatch, ...v: any[]) {
+        const stringW = `${SrColors[c]}${new SrTime(SrTime.FORMAT_BASIC).toString()} ${v.join(" ")} \n`;
 
         stdout.write(stringW);
     }
-    private static _gspace = 0;
-    private static _counts = {
-        main: 0
-    }
-    public static memory = 0;
+
+
 
     /* NON STATIC METHODS */
 
+    /**
+     * 
+     */
     public send(...messages: any[]): void {
         SrConsole.printing("BLUE", ...messages);
     };
@@ -162,7 +198,7 @@ export default class SrConsole {
      * @param {any} messages Valores a mostrar en la consola
      */
     public count(label?: string) {
-        if (!label) SrConsole._counts.main++
+        if (!label) SrConsole.#counts.main++
 
     }
 
