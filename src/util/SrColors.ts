@@ -1,3 +1,4 @@
+import util from "util";
 export default class SrColors extends Object {
     public static readonly BLACK = new SrColors("BLACK", "\x1b[30m");
     public static readonly RED = new SrColors("RED", "\x1b[31m");
@@ -48,12 +49,12 @@ export default class SrColors extends Object {
         switch (typeof varof) {
             case 'string': return `${dfault.join("")}${varof}${this.RESET}`;
             case 'number': return `${this.GREEN}${varof}${this.RESET}`;
-            case 'boolean': return `${this.GREEN}${varof ? "true" : "false"}${this.RESET}`;
+            case 'boolean': return `${this.BLUE}${this.BRIGHT}${varof ? "true" : "false"}${this.RESET}`;
             case 'bigint': return `${this.GREEN}${varof}${this.RESET}`;
-            case 'function': return `${this.YELLOW}${varof.name}${this.RESET}`;
-            case 'object': return `${this.CYAN}${varof}${this.RESET}`;
-            case 'symbol': return `${this.MAGENTA}${new String(varof)}${this.RESET}`;
-            case 'undefined': return `${this.BLUE}${this.BRIGHT}${this.UNDERSCORE}undefined${this.RESET}`;
+            case 'function': return `${this.YELLOW}${varof.name == "" ? this.BLINK + "annonymous" : varof.name}${this.RESET}`;
+            case 'object': return `${this.CYAN}${JSON.stringify(varof, null, 4)}${this.RESET}`;
+            case 'symbol': return `${this.MAGENTA}${varof.toString()}${this.RESET}`;
+            case 'undefined': return `${this.BLACK}${this.BRIGHT}${this.UNDERSCORE}undefined${this.RESET}`;
         }
     }
 

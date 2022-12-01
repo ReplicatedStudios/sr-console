@@ -4,23 +4,19 @@
   "description": "Modulo mejorado de la consola de node.js",
   "main": "./build/index.js",
   "module": "./module/index.js",
+  "bin": "./src/bin/index",
   "scripts": {
-    "compile": "tsc -p ./tsconfig.json && tsc -p ./zbuild.tsconfig.json",
-    "test:basic": "tsc && node testing/basic.js"
+    "build": "tsc -p ./tsconfig.json && tsc -p ./zbuild.tsconfig.json",
+    "test:main": "tsc && node testing/main.test.js"
   },
-  "keywords": [
-    "Console",
-    "Node.Console",
-    "VoxelatedHost"
-  ],
   "type": "module",
+  "dependencies": {
+    "@types/socket.io": "^3.0.2",
+    "dotenv": "^16.0.3",
+    "socket.io": "^4.5.4"
+  },
   "author": "Voxelated Software",
   "license": "MIT",
-  "dependencies": {
-    "dotenv": "^10.0.0",
-    "socket.io": "^4.2.0",
-    "@types/socket.io": "^3.0.2"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Zixasis/sr-console.git"
@@ -33,8 +29,9 @@
     "win32",
     "linux"
   ],
-  "devDependencies": {
-    "@types/dotenv": "^8.2.0",
-    "@types/node": "^16.11.3"
-  }
+  "keywords": [
+    "Console",
+    "Node.Console",
+    "VoxelatedHost"
+  ]
 }
