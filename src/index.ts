@@ -1,30 +1,38 @@
 import "dotenv/config";
 import SrConsole from "./lib/SrConsole.js";
-import SrConsoleLib from "./lib/SrConsole.js";
-import SrTime from "./util/SrTime.js";
+import iSrConfig from "./interface/iSrConfig.js";
+import iSrTime from "./interface/iSrTime.js";
+import SrPrint from "./lib/SrPrint.js";
 
-interface Console extends SrConsoleLib {
-    groupEnd(): void;
-    groupEnd(message: string): void;
-}
+/**
+ * SRCONSOLE_EXPLICIT_OVERRIDE_CONSOLE=true
+ * SRCONSOLE_USE_HTML5=false
+ * SRCONSOLE_USE_FILE=false
+ * SRCONSOLE_DIR_FILE=./logs/lastest.log
+ * SRCONSOLE_LIST_USE_FILTER=words|censored
+ * SRCONSOLE_MODE_TIME=D_MIN #D_MAX - D_OFF - D_CLASSIC
+*/
 
 const env = process.env;
-
-const unwords = env.SR_FILTER ? env.SR_FILTER?.split('|') : [];
-const time = env.SR_TIME ? (typeof env.SR_TIME === "number" ? env.SR_TIME : SrTime.F_BASIC) : SrTime.F_BASIC;
-const h5 = env.SR_HTML5 ? (typeof env.SR_HTML5 === "boolean" ? env.SR_HTML5 : false) : false
-const logs = {
-    ACTIVE: typeof env.SR_FILELOG === "boolean" ? env.SR_FILELOG : false,
-    PATH: env.SR_FILEPATH ?? "/logs/",
-    NAME: env.SR_FILENAME ?? "console.txt"
+const override = env.SRCONSOLE_EXPLICIT_OVERRIDE_CONSOLE;
+const config: iSrConfig = {
+    FILTER: env.SRCONSOLE_LIST_USE_FILTER ? env.SRCONSOLE_LIST_USE_FILTER.split('|') : [],
+    TIME: env.SRCONSOLE_MODE_TIME ? (typeof env.SRCONSOLE_MODE_TIME === "number" ? env.SRCONSOLE_MODE_TIME : iSrTime.D_CLASSIC) : iSrTime.D_CLASSIC,
+    HTML5: !(!env.SRCONSOLE_USE_HTML5) || env.SRCONSOLE_USE_HTML5 === "true",
+    FILE_USE: !(!env.SRCONSOLE_USE_FILE) || env.SRCONSOLE_USE_FILE === "true",
+    FILE_USE_RAW: !(!env.SRCONSOLE_USE_FILE_RAW) || env.SRCONSOLE_USE_FILE_RAW === "true",
+    FILE: env.SRCONSOLE_DIR_FILE ?? "./lastest.log",
+    LOG_PREFIX: !(!env.SRCONSOLE_USE_PREFIX),
 };
 
+declare global { var LOG: SrConsole; }
+
+global.LOG = new SrConsole(config);
+globalThis.LOG = new SrConsole(config);
 
 // @ts-expect-error
-global.SrConsole = SrConsoleLib;
-// @ts-expect-error
-global.Console = SrConsoleLib;
-// @ts-expect-error
-global.console = new SrConsoleLib(new SrConsoleLib.SrConfig(unwords, time, h5, logs));
+if (!(override != undefined) || override) global.console = global.LOG;
+interface Console extends SrConsole{};
 
-export default SrConsoleLib;
+export default SrConsole;
+export const SrPrinter = SrPrint;
