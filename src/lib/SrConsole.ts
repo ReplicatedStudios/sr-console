@@ -4,7 +4,7 @@ import path from "path";
 
 import iSrTime from "../interface/iSrTime.js";
 import iSrColors from "../interface/iSrColors.js";
-import { counts, iStd, PrintData, PrintObject, SrWriteStream } from "../interface/iSrUtil.js";
+import { counts, PrintData, PrintObject, SrWriteStream } from "../interface/iSrUtil.js";
 import iSrConfig from "../interface/iSrConfig.js";
 
 export default class SrConsole {
@@ -13,6 +13,7 @@ export default class SrConsole {
 
     static STREAMS_RAW?: fs.WriteStream;
     static #counts: counts = { default: 0 };
+    static #timers: { [key: string]: Date } = {};
     static #config: iSrConfig;
     static #groups = 0;
 
@@ -22,14 +23,12 @@ export default class SrConsole {
         const logdir = path.join(cwd(), config.FILE);
 
         if (!fs.existsSync(logdir)) fs.mkdirSync(logdir, { recursive: true });
-        if (!fs.existsSync(path.join(logdir, "lastest.log"))) fs.writeFileSync(path.join(logdir, "lastest.log"), "");
         if (config.FILE_USE) SrConsole.STREAMS.push(fs.createWriteStream(path.join(logdir, "lastest.log")));
         if (config.FILE_USE_RAW) SrConsole.STREAMS_RAW = fs.createWriteStream(path.join(logdir, "raw.log"));
         if (console instanceof SrConsole) console.warn("Ya existe una instancia de SrConsole. ¿Esto es un error?");
     }
 
     public static isInstanceExisting() { return this.#config && console instanceof this; }
-
     static #print(data: PrintData) {
         for (let i = 0; i < data.values.length; i++) data.values.push(iSrColors.parseTypeof(data.values.shift(), data.colors));
 
@@ -126,18 +125,33 @@ export default class SrConsole {
     
     public trace(message?: string, ...optionalParams: any[]) { return this.fatal(message, ...optionalParams); }
 
+    public time(label?: string) { 
+        SrConsole.#timers[label ?? "default"] = new Date();
+        SrConsole.#print(new PrintObject("out", iSrColors.get("CYAN", "T_DIM"), [SrConsole.#config.LOG_PREFIX ? "[INFO]" : "", `Temporizador ${label ?? "default"} iniciado`]));
+    }
 
-    public time(label?: string) { throw new Error("time isn't working yet."); }
-    public timeEnd(label?: string) { throw new Error("timeEnd isn't working yet."); }
-    public timeLog(label?: string, ...data: any[]) { throw new Error("timeLog isn't working yet."); }
-    public timeStamp(label?: string) { throw new Error("timeStamp isn't working yet."); }
+    public timeEnd(label?: string) {
+        const saved = SrConsole.#timers[label ?? "default"];
+        // @ts-expect-error
+        SrConsole.#timers[label ?? "default"] = undefined;
+        SrConsole.#print(new PrintObject("out", iSrColors.get("CYAN", "T_DIM"), [SrConsole.#config.LOG_PREFIX ? "[INFO]" : "", `Temporizador finalizado: ${new Date().getDate() - saved.getDate()}ms`]));
+    }
 
+    public timeLog(label?: string) {
+        const saved = SrConsole.#timers[label ?? "default"];
+        SrConsole.#print(new PrintObject("out", iSrColors.get("CYAN", "T_DIM"), [SrConsole.#config.LOG_PREFIX ? "[INFO]" : "", `Tiempo del temporizador: ${new Date().getDate() - saved.getDate()}ms`]));    
+    }
+
+    public timeStamp(label?: string) {
+        this.timeLog(label);
+        return SrConsole.#timers[label ?? "default"];
+    }
     
     // INVALIDATED FUNCTIONS
     public dir(obj?: any, options?: any): void { throw new Error("dir isn't working on NODE. Plz remove it"); }
     public dirxml(...data: any[]): void { throw new Error("dirxml isn't working on NODE. Plz remove it"); }
     public clear() { throw new Error("clear isn't working on NODE. Plz remove it"); }
-    public table(tabularData?: any, properties?: readonly string[]){ throw new Error("table isn't working on NODE. Plz remove it"); }
+    public table(tabularData?: any, properties?: readonly string[]){ throw new Error("table isn't working on SR-CONSOLE yet."); }
     public profile(label?: unknown) { throw new Error("profile isn't working on NODE. Plz remove it"); }
     public profileEnd(label?: unknown) { throw new Error("profileEnd isn't working on NODE. Plz remove it"); }
 }
