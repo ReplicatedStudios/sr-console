@@ -34,5 +34,6 @@ globalThis.LOG = new SrConsole(config);
 if (!(override != undefined) || override) global.console = global.LOG;
 interface Console extends SrConsole{};
 
-export default SrConsole;
-export const SrPrinter = SrPrint;
+// @ts-expect-error
+export = SrPrint;
+export default SrPrint;

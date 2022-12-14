@@ -2,12 +2,16 @@
   "name": "sr-console",
   "version": "0.20.0-ALPHA",
   "description": "Modulo mejorado de la consola de node.js",
-  "main": "./build/index.js",
-  "module": "./module/index.js",
-  "bin": "./src/bin/index",
+  "main": "./common/build/index.js",
+  "module": "./modules/build/index.js",
   "scripts": {
-    "build": "tsc -p ./tsconfig.json && tsc -p ./zbuild.tsconfig.json",
-    "test:main": "tsc && node testing/main.test.js"
+    "build:all": "npm run build:modules && npm run build:commonjs",
+    "build:modules": "tsc -p ./modules/tsconfig.json",
+    "build:commonjs": "tsc -p ./common/tsconfig.json",
+
+    "test:basics": "tsc && node testing/basics.test.js",
+    "test:complex": "tsc && node testing/basics.test.js",
+    "test:lastest": "tsc && node testing/basics.test.js"
   },
   "type": "module",
   "dependencies": {

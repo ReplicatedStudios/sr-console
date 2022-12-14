@@ -1,4 +1,5 @@
-import SrPrint from "../modules/build/index.js";
+const SrPrint = require("../common/build/index.js");
+
 
 console.count("count");
 console.count("count");
@@ -12,6 +13,7 @@ console.countReset("count")
 console.count("count");
 console.count("count");
 console.count("count");
+console.warn(SrPrint);
 
 const printer = new SrPrint("COMPLEX");
 printer.send("W", "NUEVO PRINTER CREADO");

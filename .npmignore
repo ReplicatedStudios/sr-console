@@ -3,7 +3,6 @@
 *.ts
 *.log
 ./logs/*
-./src/test
 ./logs.txt
 ./test
 

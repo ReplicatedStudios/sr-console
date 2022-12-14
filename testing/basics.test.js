@@ -1,5 +1,6 @@
-import "../module/index.js";
+import "../modules/build/index.js";
 
+console.time();
 console.warn("Iniciando demostracion de SR-CONSOLE");
 console.warn("La implementacion puede estar a medias");
 console.log("Cargando servidor ficticio");
@@ -20,3 +21,8 @@ console.success("Se ha iniciado session exitosamente")
 console.info("Estan pendientes los 43 registros sin cargar");
 console.info("el servidor se encuentra usando 43gb de ram")
 console.info("no se pudo procesar el modelo del procesador, se utilizo el modo seguro");
+setTimeout(() => {
+    console.timeEnd();
+    console.clear()
+}, 2000);
+
