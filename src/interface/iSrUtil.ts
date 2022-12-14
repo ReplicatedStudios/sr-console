@@ -5,9 +5,6 @@ export type valueof<T> = T[keyof T];
 export type iStd = "out" | "err";
 export type counts = { [i: string]: number};
 
-// ADVANCED
-export type SrWriteStream<T> = T & { write(...args: string[]): any; };
-
 // COMPLEX UTIL
 export interface PrintData {
     readonly std: iStd;
