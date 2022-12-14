@@ -4,7 +4,7 @@ import path from "path";
 
 import iSrTime from "../interface/iSrTime.js";
 import iSrColors from "../interface/iSrColors.js";
-import { counts, PrintData, PrintObject, SrWriteStream } from "../interface/iSrUtil.js";
+import { counts, PrintData, PrintObject } from "../interface/iSrUtil.js";
 import iSrConfig from "../interface/iSrConfig.js";
 import { Writable } from "stream";
 import Socket from "socket.io";
