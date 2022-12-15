@@ -1,6 +1,6 @@
 {
   "name": "sr-console",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "Modulo mejorado de la consola de node.js",
   "main": "./common/build/index.js",
   "module": "./modules/build/index.js",
@@ -15,7 +15,7 @@
 
     "publishing": "npm run build:all && npm publish"
   },
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
     "@types/socket.io": "^3.0.2",
     "dotenv": "^16.0.3",

@@ -39,7 +39,7 @@ Importante: Si estas usando un archivo .env deberas situarlo en la raiz del proy
 # WIP: Puedes filtrar todo el .ENV de tu entorno enviando un boolean true
 # SYNTAXIS:: "example word|example text to censore|private-token-key"
 # false | SYNTAXIS:: - DEFAULT: false
-SRCONSOLE_LIST_USE_FILTER=xxxxx-yyyyy|nigga
+SRCONSOLE_LIST_USE_FILTER=xxxxx-yyyyy|private-token-key
 
 # Muestras de tiempo
 # DBASIC: [00:00:00]
