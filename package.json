@@ -1,6 +1,6 @@
 {
   "name": "sr-console",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Modulo mejorado de la consola de node.js",
   "main": "./common/build/index.js",
   "module": "./modules/build/index.js",
