@@ -1,35 +1,65 @@
-# LOS MODALES HACEN A LA CONSOLA
-Una libreria que le da mas color a la consola de tu aplicacion para que sea facilmente comprensible, incluyendo herramientas utiles.
-Bastante poderosa y requiere poca configuracion. Deja atras el complicarte en leer archivos de Log de tu codigo o saber cuando ocurrio el error, ahora puedes tener todo mas organizado y facil de
-previsualizar
+# SR-CONSOLE & SR-PRINT | CONSOLA ELEGANTE
+Una herramienta diseñada para facilitar la lectura de la consola, ahora todo se te carga de forma organizada
 
+## FUNCIONES PRINCIPALES
+- COLORES: Toda salida de informacion hacia la consola se vera representada con una paleta de colores unica para mejorar la lectura
+- LOGS: No pierdas que causo el crasheo. SR-CONSOLE puede generar archivos .log que retienen toda la informacion de salida
+- SR-PRINT: Un plugin integrado en la libreria, su uso es bastante sencillo
+    - `const PRINT = new LOG.SrPrint("SYSTEM");` - Crea tus propios SrPrint
+    - `PRINT.send("L", "My cool output")` - Funcion global para cualquier output -> `[00:00:00] [SYSTEM]: My cool output`
+    - `PRINT.subPrinter("MY-SUBPRINT")` - Crea un hijo del SrPrint principal -> `[00:00:00] [SYSTEM/MY-SUBPRINT]: My cool output`
 
-### ``MODULO EN BETA``
+## DESTACADO
+- `console.send(privateToken);` - Censura cualquier valor predefinido
+- `console.spy(value);` - Obten cualquier valor, arrojalo en consola y regresalo a su destino, ideal para mantener codigo de 1 linea
+- `console.trace(new Error())` - Ahora existe para NodeJS, alias de `console.fatal()`
+- `console.fatal(new Error())` - Arroja un error y finaliza el proceso de forma segura
+- `console.SrColors.get("RED")` - Obten colores personalizados para diferentes valores
+<br>
+<br>
 
-### = CHANGELOG 0.14.2 - BETA =
-- Se implemento soporte a ES5/commonjs ( ``require('module')``) y a su vez soporte a ESNext (``import 'module'``)
-- Correccion de errores menores y mejoras en el codigo
-
-## INICIALIZACION
-Commonjs
+# INICIALIZACION Y CONFIGURACION
+## Solicita el modulo
 ```ts
+// COMMONJS
 require('sr-console');
-```
-ES6 / ESNEXT
-```ts
+
+// MODULE (EJ5 / ESNEXT)
 import "sr-console";
 ```
-Archivo `.env` de tu Proyecto
+
+## Configuracion (`.env`)
+Importante: Si estas usando un archivo .env deberas situarlo en la raiz del proyecto
 ```env
-# Filtro de palabras/claves en .send(). Separados con el simbolo "|" - DEFAULT 
-SR_CONSOLE_FILTER="bad word|nword"
+# Filtro de palabras (para privacidad o etc.)
+# SYNTAXIS: "example word|example text to censore|private-token-key"
+# WIP: Puedes filtrar todo el .ENV de tu entorno enviando un boolean true
+# false | SYNTAXIS - DEFAULT: false
+SRCONSOLE_LIST_USE_FILTER=xxxxx-yyyyy|secret-token
 
-# Formato de fecha y hora al inicio de cada log
-# long | short | basic | none - DEFAULT: simple
-SR_CONSOLE_TIME=short
+# Muestras de tiempo
+# "D_MIN" | "D_MAX" | "D_OFF" | "D_CLASSIC" - DEFAULT: "D_CLASSIC"
+SRCONSOLE_MODE_TIME=D_CLA
 
-# Activar registro de logs en la carpeta de tu proyecto - DEFAULT: false
-SR_CONSOLE_LOG=true
+# Activa el registro de la consola en un archivo TXT con procesado %string%
+# Se agrego un archivo adicional para escritura en crudo
+# true | false - DEFAULT: false
+# /path/to/file - DEFAULT: "/logs/"
+SRCONSOLE_USE_FILE=false
+SRCONSOLE_USE_FILE_RAW=false
+SRCONSOLE_DIR_FILE=./logs
+
+# Desactiva los colores para terminales basadas en HTML5 (no posprocesado)
+# true | false - DEFAULT: false
+SRCONSOLE_USE_HTML5=true
+
+# Activa el prefix de cada salida de log que utilices: Log.send() mostrara el prefix [LOG] y Log.warn() el prefix [WARN]
+# true | false - DEFAULT: false
+SRCONSOLE_USE_PREFIX=true
+
+# Remplaza la variable global `console`. Esto no remplaza los tipos de TS por limitaciones
+# true | false - DEFAULT: true
+SRCONSOLE_EXPLICIT_OVERRIDE_CONSOLE=true
 ```
 ## FUNCIONES BASICAS
 La libreria cuenta con casi todas las funciones que existen en la clase `Console` original.
@@ -50,6 +80,16 @@ setTimeout(() => {
     console.ferror() /* ALIAS */
 }, 2000)
 ```
+
+## CHANGELOG
+- 0.20.0-ALPHA:
+    - Se refactorizo todo el codigo
+    - Implementado archivo de salida `/logs/raw.log` (desactivado por defecto)
+    - Se cambiaron los colores de algunos outputs
+    - Ya se puede personalizar el directorio contenedor de todos los archivos.log
+    - Correccion a fugas de memoria y rendimiento
+    - NUEVO: Prefix para cada Output (desactivado por defecto)
+    - NUEVO: SrPrint
 
 ## UTILIDADES
 Principales funciones del modulo

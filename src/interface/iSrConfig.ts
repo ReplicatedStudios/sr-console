@@ -1,13 +1,13 @@
-import { iDateDisplay } from "./iSrTime";
+import { iDateMode } from "./iSrTime";
 
 export default interface iSrConfig {
     // CORE
     readonly FILTER: string[];
-    readonly TIME: iDateDisplay;
+    readonly TIME: keyof iDateMode;
     readonly HTML5: boolean;
     // FILE CONFIG
+    readonly FILE: string;
     readonly FILE_USE: boolean;
     readonly FILE_USE_RAW: boolean;
-    readonly FILE: string;
     readonly LOG_PREFIX: boolean;
 }

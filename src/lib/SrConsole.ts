@@ -43,7 +43,7 @@ export default class SrConsole {
         for (let i = 0; i < data.values.length; i++) data.values.push(iSrColors.parseTypeof(data.values.shift(), data.colors));
 
         // BUILD
-        const output = `${iSrColors.get("MAGENTA") + "• ".repeat(this.#groups)}${data.colors}${new iSrTime(this.#config.TIME ?? iSrTime.D_CLASSIC)} ${this.#config.LOG_PREFIX ? data.values.shift() : ""}${data.colors}: ${data.values.join(" ").replace(/\n/gi, "\n" + "  ".repeat(this.#groups))}${this.SRCOLORS.get("TRESET")}\n`;
+        const output = `${iSrColors.get("MAGENTA") + "• ".repeat(this.#groups)}${data.colors}${new iSrTime(this.#config.TIME ?? "DBASIC")} ${this.#config.LOG_PREFIX ? data.values.shift() : ""}${data.colors}: ${data.values.join(" ").replace(/\n/gi, "\n" + "  ".repeat(this.#groups))}${this.SRCOLORS.get("TRESET")}\n`;
         SrConsole.FILELOG?.write(iSrColors.parseColorToText(output));
         SrConsole.FILERAW?.write(iSrColors.parseToNone(output));
 
@@ -60,6 +60,7 @@ export default class SrConsole {
 
     public readonly SrConsole: typeof SrConsole = SrConsole;
     public readonly SrPrint: typeof SrPrint = SrPrint;
+    public readonly SrColors: typeof iSrColors = iSrColors;
 
     public get memory() { return Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100; }
     public get defaultPrint() { return SrConsole.#DEFAULTPRINT; }
