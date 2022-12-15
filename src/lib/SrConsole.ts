@@ -69,6 +69,15 @@ export default class SrConsole {
         else { this.success("[SR-CONSOLE] Se monto el Socket a la consola exitosamente"); return true; }
     }
 
+    public load(from: "RAW" | "NORMAL" | "H5") {
+        switch(from) {
+            case "RAW": return fs.readFileSync(path.join(SrConsole.#config.FILE_DIR, "raw.log"));
+            case "NORMAL": return fs.readFileSync(path.join(SrConsole.#config.FILE_DIR, "lastest.log"));
+            case "H5": return fs.readFileSync(path.join(SrConsole.#config.FILE_DIR, "lastest.html"));
+            default: this.fatal(new Error("No es valido el archivo" + from + "solicitado"));
+        }
+    }
+
     public assert(validate: true): void;
     public assert(validate: false): never;
     public assert(validate: boolean): void | never;
