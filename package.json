@@ -13,7 +13,7 @@
     "test:complex": "tsc && node testing/basics.test.js",
     "test:lastest": "tsc && node testing/basics.test.js",
 
-    "publish": "npm run build:all && npm publish"
+    "publishing": "npm run build:all && npm publish"
   },
   "type": "module",
   "dependencies": {
