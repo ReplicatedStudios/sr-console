@@ -8,28 +8,34 @@ import { counts, PrintData, PrintObject } from "../interface/iSrUtil.js";
 import iSrConfig from "../interface/iSrConfig.js";
 import { Writable } from "stream";
 import Socket from "socket.io";
+import SrPrint from "./SrPrint.js";
 
 export default class SrConsole {
     static readonly SRCOLORS = iSrColors;
+    static readonly #DEFAULTPRINT: SrPrint = new SrPrint("SYSTEM");
     static FILELOG?: Writable;
     static FILERAW?: Writable;
+    static FILEHTML5?: Writable;
     static IO?: Socket.Server;
-
+    
     static #counts: counts = { default: 0 };
     static #timers: { [key: string]: Date } = {};
     static #config: iSrConfig;
     static #groups = 0;
 
+    /** Clase por defecto de SrConsole, No utilizar la clase para sub-instanciar nuevas consolas durante el tiempo de ejecucion
+     * la clase no fue diseñada para ser instanciada mas de una vez*/
     constructor(config: iSrConfig) {
-        // super(null, null);
         SrConsole.#config = config;
         const logdir = path.join(cwd(), config.FILE);
 
         if (!fs.existsSync(logdir)) fs.mkdirSync(logdir, { recursive: true });
-        if (config.FILE_USE) SrConsole.FILELOG = fs.createWriteStream(path.join(logdir, "lastest.log"), {flags: "w"});
-        if (config.FILE_USE_RAW) SrConsole.FILERAW = fs.createWriteStream(path.join(logdir, "raw.log"));
+        if (config.FILE_USE) SrConsole.FILELOG = fs.createWriteStream(path.join(logdir, "lastest.log"), { encoding: "utf-8", flags: "a" });
+        if (config.FILE_USE_RAW) SrConsole.FILERAW = fs.createWriteStream(path.join(logdir, "raw.log"), { encoding: "utf-8", flags: "a" });
+        if (config.HTML5) SrConsole.FILEHTML5 = fs.createWriteStream(path.join(logdir, "lastest.html"), { encoding: "utf-8", flags: "w" });
 
-        if (console instanceof SrConsole) console.warn("Ya existe una instancia de SrConsole. ¿Esto es un error?");
+        // PREVENIR NUEVAS INSTANCIAS
+        if (console instanceof SrConsole) console.fatal(new Error("Ya existe una instancia de SrConsole. ¡NO LO VUELVAS A HACER!"));
     }
 
     public static isInstanceExisting() { return this.#config && console instanceof this; }
@@ -37,43 +43,51 @@ export default class SrConsole {
         for (let i = 0; i < data.values.length; i++) data.values.push(iSrColors.parseTypeof(data.values.shift(), data.colors));
 
         // BUILD
-        const output = `${iSrColors.get("MAGENTA") + "• ".repeat(this.#groups)}${data.colors}${new iSrTime(this.#config.TIME ?? iSrTime.D_CLASSIC)} ${this.#config.LOG_PREFIX ? data.values.shift() : ""}${data.colors}: ${data.values.join(" ").replace(/\n/gi, "\n" + "  ".repeat(this.#groups))}${this.SRCOLORS.get("T_RESET")}\n`;
+        const output = `${iSrColors.get("MAGENTA") + "• ".repeat(this.#groups)}${data.colors}${new iSrTime(this.#config.TIME ?? iSrTime.D_CLASSIC)} ${this.#config.LOG_PREFIX ? data.values.shift() : ""}${data.colors}: ${data.values.join(" ").replace(/\n/gi, "\n" + "  ".repeat(this.#groups))}${this.SRCOLORS.get("TRESET")}\n`;
         SrConsole.FILELOG?.write(iSrColors.parseColorToText(output));
         SrConsole.FILERAW?.write(iSrColors.parseToNone(output));
-        // HTML5 Parse WIP
-        SrConsole.IO?.emit(`srconsole:${data.std}`, SrConsole.#config.HTML5 ? iSrColors.parseToNone(output) : iSrColors.parseToNone(output));
+
+        if (this.#config.HTML5) {
+            const outputHTML5 = iSrColors.parseColorToHTML5(iSrColors.parseColorToText(output));
+            SrConsole.FILEHTML5?.write(outputHTML5);
+            SrConsole.IO?.emit(`srconsole:${data.std}`, outputHTML5);
+        } else SrConsole.IO?.emit(`srconsole:${data.std}`, iSrColors.parseToNone(output));
 
         if (data.std === "out") stdout.write(output);
         else if (data.std === "err") stderr.write(output);
         else throw new Error("No STD string specified");
     }
 
-    public Console: typeof SrConsole = SrConsole;
-    public SrConsole: typeof SrConsole = SrConsole;
+    public readonly SrConsole: typeof SrConsole = SrConsole;
+    public readonly SrPrint: typeof SrPrint = SrPrint;
+
     public get memory() { return Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100; }
+    public get defaultPrint() { return SrConsole.#DEFAULTPRINT; }
     public setSocketIO(socket: Socket.Server) {
         if (!socket.engine) { this.err("[SR-CONSOLE] No se pudo instalar el Socket a la consola"); return false;} 
         else { this.success("[SR-CONSOLE] Se monto el Socket a la consola exitosamente"); return true; }
     }
 
-    public assert(validate: boolean, ...values: any[]) {
-        // if (!validate) return SrConsole.#print({ colors: [iSrColors.get("RED"), iSrColors.get("T_BRIGHT")], std: "err", values });
-        if (!validate) return SrConsole.#print(new PrintObject("out", iSrColors.get("RED", "T_BRIGHT"), [SrConsole.#config.LOG_PREFIX ? "[LOGS]" : "",  ...values]));
+    public assert(validate: true): void;
+    public assert(validate: false): never;
+    public assert(validate: boolean): void | never;
+    public assert(validate: boolean) {
+        if (!validate) return this.fatal(new Error("Comprobacion de Assert no permitida"));
     }
 
     public count(label?: string): void {
         const l = label ?? "default"
         const c = SrConsole.#counts[l] == undefined ? SrConsole.#counts[l] = 0 : SrConsole.#counts[l] += 1;
-        SrConsole.#print(new PrintObject("out", iSrColors.get("CYAN", "T_DIM"), [SrConsole.#config.LOG_PREFIX ? "[INFO]" : "", `Contador '${l}' cambio a`, c]));
+        this.debug(`Contador '${l}' cambio a`, c);
     }
 
     public countReset(label?: string): void {
         SrConsole.#counts[label ?? "default"] = 0;
-        SrConsole.#print(new PrintObject("out", iSrColors.get("CYAN"), [SrConsole.#config.LOG_PREFIX ? "[INFO]" : "", `Contador '${label ?? "default"}' fue reiniciado`]));
+        this.debug(`Contador '${label ?? "default"}' fue reiniciado`)
     }
 
     public debug(message: unknown, ...optionalParams: unknown[]): void {
-        SrConsole.#print(new PrintObject("out", iSrColors.get("CYAN", "T_DIM"), [SrConsole.#config.LOG_PREFIX ? "[DEBUG]" : "", message, ...optionalParams]));
+        SrConsole.#print(new PrintObject("out", iSrColors.get("BLACK", "TBLINK"), [SrConsole.#config.LOG_PREFIX ? "[DEBUG]" : "", message, ...optionalParams]));
     }
 
     public err(message: unknown, ...optionalParams: unknown[]): void { this.error(message, ...optionalParams) }
@@ -98,7 +112,7 @@ export default class SrConsole {
      * Elimina un grupo de logs. no emitira nada si no hay grupos activos */
     public unGroup(message: any) {
         SrConsole.#groups = 0;
-        SrConsole.#print(new PrintObject("out", iSrColors.get("MAGENTA"), [SrConsole.#config.LOG_PREFIX ? "[LOGS]" : "", message]));
+        SrConsole.#print(new PrintObject("out", iSrColors.get("MAGENTA"), [SrConsole.#config.LOG_PREFIX ? "[INFO]" : "", message]));
     }
 
     /** Elimina todos los grupos activos. no emitira nada si no hay grupos activos */
@@ -120,10 +134,16 @@ export default class SrConsole {
         SrConsole.#print(new PrintObject("out", iSrColors.get("GREEN"), [SrConsole.#config.LOG_PREFIX ? "[SUCCESS]" : "", message, ...optionalParams]));
     }
 
-    public fatal(message: any, ...optionalParams: any[]): never {
-        SrConsole.#print(new PrintObject("out", iSrColors.get("RED", "BG_WHITE"), [SrConsole.#config.LOG_PREFIX ? "[FATAL-ERROR]" : "", message, ...optionalParams]));
+    public fatalBack(message: Error): void {
+        SrConsole.#print(new PrintObject("out", iSrColors.get("ZWHITE", "TBRIGHT", "RED"), [SrConsole.#config.LOG_PREFIX ? "[FATAL-ERROR]" : "", message.stack]));
+    }
+
+    public fatal(message: Error): never {
+        this.fatalBack(message);
         process.exit(1);
     }
+
+    public trace(message: Error) { return this.fatal(message); }
 
     public log(message: any, ...optionalParams: any[]): void {
         SrConsole.#print(new PrintObject("out", iSrColors.get("BLUE"), [SrConsole.#config.LOG_PREFIX ? "[LOGS]" : "", message, ...optionalParams]));
@@ -138,24 +158,22 @@ export default class SrConsole {
     public warn(message: any, ...optionalParams: unknown[]): void {
         SrConsole.#print(new PrintObject("err", iSrColors.get("YELLOW"), [SrConsole.#config.LOG_PREFIX ? "[WARN]" : "", message, ...optionalParams]));
     }
-    
-    public trace(message: string, ...optionalParams: any[]) { return this.fatal(message, ...optionalParams); }
 
     public time(label?: string) { 
         SrConsole.#timers[label ?? "default"] = new Date();
-        SrConsole.#print(new PrintObject("out", iSrColors.get("CYAN", "T_DIM"), [SrConsole.#config.LOG_PREFIX ? "[INFO]" : "", `Temporizador '${label ?? "default"}' iniciado`]));
+        this.debug(`Temporizador '${label ?? "default"}' iniciado`);
     }
 
     public timeEnd(label?: string) {
         const saved = SrConsole.#timers[label ?? "default"];
         // @ts-expect-error
         SrConsole.#timers[label ?? "default"] = undefined;
-        SrConsole.#print(new PrintObject("out", iSrColors.get("CYAN", "T_DIM"), [SrConsole.#config.LOG_PREFIX ? "[INFO]" : "", `Temporizador '${label ?? "default"}' finalizado: ${Math.abs(new Date().getTime() - saved.getTime())}ms`]));
+        this.debug(`Temporizador '${label ?? "default"}' finalizado: ${Math.abs(new Date().getTime() - saved.getTime())}ms`)
     }
 
     public timeLog(label?: string) {
         const saved = SrConsole.#timers[label ?? "default"];
-        SrConsole.#print(new PrintObject("out", iSrColors.get("CYAN", "T_DIM"), [SrConsole.#config.LOG_PREFIX ? "[INFO]" : "", `Tiempo del temporizador '${label ?? "default"}': ${Math.abs(new Date().getTime() - saved.getTime())}ms`]));    
+        this.debug(`Tiempo del temporizador '${label ?? "default"}': ${Math.abs(new Date().getTime() - saved.getTime())}ms`);
     }
 
     public timeStamp(label?: string) {
