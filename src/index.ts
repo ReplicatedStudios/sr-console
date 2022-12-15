@@ -34,6 +34,7 @@ const config: iSrConfig = {
 declare global { 
     var LOG: SrConsole;
     var PRINT: SrPrint;
+    interface Console extends SrConsole {}
 }
 
 global.LOG = new SrConsole(config);
@@ -44,8 +45,6 @@ globalThis.PRINT = LOG.defaultPrint;
 
 // @ts-expect-error
 if (!(override != undefined) || override) global.console = global.LOG;
-interface Console extends SrConsole {};
-
 // HANDLERS
 new Processor(PRINT);
 
