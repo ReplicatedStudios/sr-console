@@ -3,6 +3,7 @@ import SrConsole from "./lib/SrConsole.js";
 import iSrConfig from "./interface/iSrConfig.js";
 import iSrTime from "./interface/iSrTime.js";
 import SrPrint from "./lib/SrPrint.js";
+import Processor from "./handlers/processor.js";
 
 /**
  * SRCONSOLE_EXPLICIT_OVERRIDE_CONSOLE=true
@@ -25,15 +26,24 @@ const config: iSrConfig = {
     LOG_PREFIX: !(!env.SRCONSOLE_USE_PREFIX),
 };
 
-declare global { var LOG: SrConsole; }
+declare global { 
+    var LOG: SrConsole;
+    var PRINT: SrPrint;
+}
 
 global.LOG = new SrConsole(config);
 globalThis.LOG = new SrConsole(config);
 
-// @ts-expect-error
-if (!(override != undefined) || override) global.console = global.LOG;
-interface Console extends SrConsole{};
+global.PRINT = LOG.defaultPrint;
+globalThis.PRINT = LOG.defaultPrint;
 
 // @ts-expect-error
-export = SrPrint;
-export default SrPrint;
+if (!(override != undefined) || override) global.console = global.LOG;
+interface Console extends SrConsole {};
+
+// HANDLERS
+new Processor(PRINT);
+
+// @ts-expect-error
+export = SrConsole;
+export default SrConsole;
