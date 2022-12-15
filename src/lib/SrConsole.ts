@@ -27,7 +27,7 @@ export default class SrConsole {
      * la clase no fue diseñada para ser instanciada mas de una vez*/
     constructor(config: iSrConfig) {
         SrConsole.#config = config;
-        const logdir = path.join(cwd(), config.FILE);
+        const logdir = path.join(cwd(), config.FILE_DIR);
 
         if (!fs.existsSync(logdir)) fs.mkdirSync(logdir, { recursive: true });
         if (config.FILE_USE) SrConsole.FILELOG = fs.createWriteStream(path.join(logdir, "lastest.log"), { encoding: "utf-8", flags: "a" });
