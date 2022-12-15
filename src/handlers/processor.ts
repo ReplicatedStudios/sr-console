@@ -4,10 +4,12 @@ export default class Processor {
     constructor(PRINT: SrPrint) {
         process.prependListener('SIGINT', signal => {
             PRINT.send("W", "El proceso", process.pid, "fue detenido de forma insegura, señal:", signal);
+            process.exit(0);
         });
         
         process.prependListener('SIGTERM', signal => {
             PRINT.send("S", `El proceso finalizo exitosamente`);
+            process.exit(0);
         });
         
         process.prependListener('uncaughtException', err => {
