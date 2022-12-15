@@ -1,6 +1,6 @@
 {
   "name": "sr-console",
-  "version": "0.20.0-ALPHA",
+  "version": "1.0.0",
   "description": "Modulo mejorado de la consola de node.js",
   "main": "./common/build/index.js",
   "module": "./modules/build/index.js",
@@ -23,12 +23,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Zixasis/sr-console.git"
+    "url": "git+https://github.com/SrRapero720/sr-console.git"
   },
   "bugs": {
-    "url": "https://github.com/Zixasis/sr-console/issues"
+    "url": "https://github.com/SrRapero720/sr-console/issues"
   },
-  "homepage": "https://github.com/Zixasis/sr-console#readme",
+  "homepage": "https://github.com/SrRapero720/sr-console#readme",
   "os": [
     "win32",
     "linux"
