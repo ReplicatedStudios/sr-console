@@ -1,6 +1,6 @@
 {
   "name": "sr-console",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Modulo mejorado de la consola de node.js",
   "main": "./common/build/index.js",
   "module": "./modules/build/index.js",
@@ -11,7 +11,9 @@
 
     "test:basics": "tsc && node testing/basics.test.js",
     "test:complex": "tsc && node testing/basics.test.js",
-    "test:lastest": "tsc && node testing/basics.test.js"
+    "test:lastest": "tsc && node testing/basics.test.js",
+
+    "publish": "npm run build:all && npm publish"
   },
   "type": "module",
   "dependencies": {
