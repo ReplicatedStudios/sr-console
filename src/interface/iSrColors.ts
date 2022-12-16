@@ -1,5 +1,21 @@
 // GO TO HELL NODE with your until shit.
 // https://nodejs.org/api/util.html#util_customizing_util_inspect_colors
+
+// https://github.com/termstandard/colors
+
+// https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
+// ESC[38;5;#m   background: ESC[48;5;#m
+// stdout.write("\x1b[38;2;255;100;0mTRUECOLOR\x1b[0m\n");
+
+/**
+ * \x1b[38;5;⟨n⟩m Select foreground color      where n is a number from the table below
+ * \x1b[48;5;⟨n⟩m Select background color
+ * 
+ * 0 - 7:  standard colors (as in ESC [ 30–37 m)
+ * 8 - 15:  high intensity colors (as in ESC [ 90–97 m)
+ * 16 - 231:  6 × 6 × 6 cube (216 colors): 16 + 36 × r + 6 × g + b (0 ≤ r, g, b ≤ 5)
+ * 232 - 255:  grayscale from dark to light in 24 steps
+ */
 import { stdout } from "process";
 import { valueof } from "./iSrUtil";
 export class iSrColor {
@@ -65,12 +81,12 @@ export default class iSrColors {
         switch (typeof data) {
             case 'string': return `${defaults}${data}${this.get("TRESET")}`;
             case 'number': return `${this.get("GREEN")}${data}${this.get("TRESET")}`;
-            case 'boolean': return `${this.get("BLUE")}${this.get("TBRIGHT")}${data ? "true" : "false"}${this.get("TRESET")}`;
+            case 'boolean': return `${this.get("BLUE", "TBRIGHT")}${data ? "true" : "false"}${this.get("TRESET")}`;
             case 'bigint': return `${this.get("GREEN")}${data}${this.get("TRESET")}`;
-            case 'function': return `${this.get("YELLOW")}${data.name == "" ? this.get("TBLINK") + "annonymous" : data.name}${this.get("TRESET")}`;
+            case 'function': return `${this.get("YELLOW")}${data.name == "" ? this.get("BLACK", "TBRIGHT") + "annonymous" : data.name}${this.get("TRESET")}`;
             case 'object': return `${this.get("CYAN")}${JSON.stringify(data, null, 4)}${this.get("TRESET")}`;
             case 'symbol': return `${this.get("MAGENTA")}${data.toString()}${this.get("TRESET")}`;
-            case 'undefined': return `${this.get("BLACK")}${this.get("TBRIGHT")}${this.get("TUNDERSCORE")}undefined${this.get("TRESET")}`;
+            case 'undefined': return `${this.get("BLACK", "TBRIGHT", "TUNDERSCORE")}undefined${this.get("TRESET")}`;
         }
     }
 

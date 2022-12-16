@@ -60,7 +60,8 @@ export default class SrConsole {
 
     public readonly SrConsole: typeof SrConsole = SrConsole;
     public readonly SrPrint: typeof SrPrint = SrPrint;
-    public readonly SrColors: typeof iSrColors = iSrColors;
+    public readonly iSrColors: typeof iSrColors = iSrColors;
+    public readonly iSrTime: typeof iSrTime = iSrTime;
 
     public get memory() { return Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100; }
     public get defaultPrint() { return SrConsole.#DEFAULTPRINT; }
@@ -77,8 +78,15 @@ export default class SrConsole {
             default: this.fatal(new Error("No es valido el archivo" + from + "solicitado"));
         }
     }
+
+    /**
+     * Regresa los colores argumentados en un solo String
+     */
     public color(...color: (keyof iSrColorsList)[]) { return iSrColors.get(...color); }
-    public colorRex(...color: (keyof iSrColorsList)[]) { return iSrColors.get(...color); }
+    /**
+     * Regresa un unico REGEXP del registro de colores disponible
+     */
+    public colorRex(color: keyof iSrColorsList) { return iSrColors.rex(color); }
 
     public assert(validate: true): void;
     public assert(validate: false): never;
@@ -147,15 +155,18 @@ export default class SrConsole {
         SrConsole.#print(new PrintObject("out", iSrColors.get("GREEN"), [SrConsole.#config.LOG_PREFIX ? "[SUCCESS]" : "", message, ...optionalParams]));
     }
 
+    /** Envia un error fatal a la consola pero sin finalizar el proceso */
     public fatalBack(message: Error): void {
-        SrConsole.#print(new PrintObject("out", iSrColors.get("ZWHITE", "TBRIGHT", "RED"), [SrConsole.#config.LOG_PREFIX ? "[FATAL-ERROR]" : "", message.stack]));
+        SrConsole.#print(new PrintObject("err", iSrColors.get("ZWHITE", "TBRIGHT", "RED"), [SrConsole.#config.LOG_PREFIX ? "[FATAL-ERROR]" : "", message.stack]));
     }
 
+    /** Envia un error fatal a la consola y finaliza el proceso */
     public fatal(message: Error): never {
         this.fatalBack(message);
         process.exit(1);
     }
 
+    /** Alias de `SrConsole.fatal()` */
     public trace(message: Error) { return this.fatal(message); }
 
     public log(message: any, ...optionalParams: any[]): void {
