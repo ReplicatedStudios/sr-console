@@ -14,14 +14,23 @@ export default interface iSrConfig {
 
 // WIP
 export class iSrModuleConfig {
-    constructor() {
+    readonly FILTER: string[] = [];
+    // TIME_FORMAT: keyof iDateMode;
+    // USE_HTML5: boolean;
 
-    }
+    // FILE_DIR: string;
+    // FILE_USE: boolean;
+    // FILE_USE_RAW: boolean;
+    // LOG_PREFIX: boolean;
+
+    // constructor() {
+    //     this.TIME_FORMAT 
+    // }
 
     public setFilter() {}
     public setTime() {}
-    public enableHTML5() {}
     public setFileDir() {}
+    public enableHTML5() {}
     public enableFile() {}
     public enableFileRaw() {}
     public enablePrefix() {}

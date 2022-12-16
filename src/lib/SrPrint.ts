@@ -31,7 +31,5 @@ export default class SrPrint {
         }
     }
 
-    public subPrinter(prefix: string) {
-        return new SrPrint(`${this.rawPrefix}/${prefix}`);
-    }
+    public subPrinter(prefix: string) { return new SrPrint(`${this.rawPrefix}/${prefix}`); }
 }

@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 
 import iSrTime from "../interface/iSrTime.js";
-import iSrColors from "../interface/iSrColors.js";
+import iSrColors, { iSrColorsList } from "../interface/iSrColors.js";
 import { counts, PrintData, PrintObject } from "../interface/iSrUtil.js";
 import iSrConfig from "../interface/iSrConfig.js";
 import { Writable } from "stream";
@@ -77,6 +77,8 @@ export default class SrConsole {
             default: this.fatal(new Error("No es valido el archivo" + from + "solicitado"));
         }
     }
+    public color(...color: (keyof iSrColorsList)[]) { return iSrColors.get(...color); }
+    public colorRex(...color: (keyof iSrColorsList)[]) { return iSrColors.get(...color); }
 
     public assert(validate: true): void;
     public assert(validate: false): never;
@@ -98,6 +100,7 @@ export default class SrConsole {
 
     public debug(message: unknown, ...optionalParams: unknown[]): void {
         SrConsole.#print(new PrintObject("out", iSrColors.get("BLACK", "TBLINK"), [SrConsole.#config.LOG_PREFIX ? "[DEBUG]" : "", message, ...optionalParams]));
+        debugger;
     }
 
     public err(message: unknown, ...optionalParams: unknown[]): void { this.error(message, ...optionalParams) }

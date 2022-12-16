@@ -5,6 +5,7 @@
 ./logs/*
 ./logs.txt
 ./test
+tsconfig.json
 
 # include the .d.ts files
 !*.d.ts
