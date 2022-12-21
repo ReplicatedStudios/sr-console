@@ -6,6 +6,8 @@
 ./logs.txt
 ./test
 tsconfig.json
+.gitignore
+.sh
 
 # include the .d.ts files
 !*.d.ts
