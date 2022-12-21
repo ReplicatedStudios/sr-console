@@ -1,11 +1,15 @@
+[![sr-console](https://snyk.io/advisor/npm-package/sr-console/badge.svg)](https://snyk.io/advisor/npm-package/sr-console)
+[![npm version](https://badge.fury.io/js/sr-console.svg)](https://badge.fury.io/js/sr-console)
+![GitHub last commit](https://img.shields.io/github/last-commit/SrRapero720/sr-console)
+![GitHub issues](https://img.shields.io/github/issues-raw/SrRapero720/sr-console)
+
 # INICIALIZACION
-## Instalacion
+Comando de instalacion (Node.js & NPM)
 ```cmd
 npm i sr-console
 ```
 
-## Preparacion
-Esto va al inicio de tu archivo index.js o index.ts
+Activa la libreria. Esto va al inicio de tu archivo index.js o index.ts
 ```ts
 import "sr-console"; // MODULE (EJ5 / ESNEXT)
 require('sr-console'); // COMMONJS
@@ -18,14 +22,12 @@ LOG.send("data");
 
 # CONFIGURACION (`.env`)
 Importante: Si estas usando un archivo .env deberas situarlo en la raiz del proyecto<br>
-Consulta la documentacion de la configuracion `.env` en el [repositorio](https://github.com/SrRapero720/sr-console/blob/recreacion/.env)
+Consulta la documentacion de la configuracion `.env` en el [repositorio](https://github.com/SrRapero720/sr-console/blob/main/.env)
 <br><br>
 
 # FUNCIONES BASICAS
 La libreria cuenta con casi todas las funciones que existen en la clase `Console` original.
 Aqui un ejemplo de todas las funciones con los colores que muestran y los valores que returnan
-
-### CODIGO
 ```js
 // COMMONJS
 require("sr-console");
@@ -75,23 +77,17 @@ setTimeout(() => {
 <!-- `[FIX]` `[ENH]` `[NEW]` -->
 
 # CHANGELOG
-- RELEASE: 1.1.0
+- RELEASE: 1.1.1
     - `[FIX]` Se arreglo errores en espaciado de `PRINT.send("U", "message from any")`
     - `[ENH]` Metodo `SrConsole.color()` como alias de `SrConsole.iSrColors.get()`
     - `[ENH]` Metodo `SrConsole.colorRex()` como alias de `SrConsole.iSrColors.rex()`
     - `[ENH]` Las funciones destacadas ahora estan documentadas sobre el resto de funciones
+    - `[ENH]` GIT: Merged branch recreacion -> main (deleted)
 <br>
 <br>
 
-# FUNCIONES PRINCIPALES
-## COLORES EN CONSOLA
-Toda salida de informacion hacia la consola se vera representada con una paleta de colores unica para mejorar la lectura
-
-## ARCHIVOS DE LOG
-No pierdas que causo el crasheo. SR-CONSOLE puede generar archivos .log que retienen toda la informacion de salida
-
-## `[PLUGIN]` SRPRINT
-Un plugin integrado en la libreria, su uso es bastante sencillo
+# PLUGINS
+`[PLUGIN]` SRPRINT
 ```js
 const PRINT = new LOG.SrPrint("SYSTEM");
 PRINT.send("L", "My cool output"); // Salida: [00:00:00][SYSTEM]: My cool output
@@ -111,6 +107,8 @@ PRINT.subPrinter("MY-SUBPRINT"); // Crea un SRPRINT con base al primero ->[00:00
 <br>
 
 # INTEGRACIONES
+SrConsole puede integrarse o ser integrado con otras librerias utiles para expandir la utilidad de esta herramienta.
+
 ## SrConsole x [SocketIO](https://www.npmjs.com/package/socket.io)
 Puedes implementar tu servidor SOCKET.IO 
 ```js

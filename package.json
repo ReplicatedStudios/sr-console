@@ -1,6 +1,6 @@
 {
   "name": "sr-console",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Modulo mejorado de la consola de node.js",
   "main": "./common/build/index.js",
   "module": "./modules/build/index.js",
@@ -8,11 +8,9 @@
     "build:all": "npm run build:modules && npm run build:commonjs",
     "build:modules": "tsc -p ./modules/tsconfig.json",
     "build:commonjs": "tsc -p ./common/tsconfig.json",
-
     "test:basics": "tsc && node testing/basics.test.js",
     "test:complex": "tsc && node testing/basics.test.js",
     "test:lastest": "tsc && node testing/basics.test.js",
-
     "publishing": "npm run build:all && npm publish"
   },
   "type": "commonjs",
@@ -21,7 +19,7 @@
     "dotenv": "^16.0.3",
     "socket.io": "^4.5.4"
   },
-  "author": "Voxelated Software",
+  "author": "SrRapero720",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -36,11 +34,10 @@
     "linux"
   ],
   "keywords": [
-    "Console",
-    "Node.Console",
-    "VoxelatedHost"
-  ],
-  "devDependencies": {
-    "@types/node": "^18.11.10"
-  }
+    "console",
+    "nodejs",
+    "websockets",
+    "colors",
+    "console colors"
+  ]
 }
