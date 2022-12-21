@@ -1,9 +1,10 @@
 # FOLDERS
 node_modules/
 src/test/
-build
+**/build
 module
 logs
+
 
 # FILES
 **/*.tsbuildinfo

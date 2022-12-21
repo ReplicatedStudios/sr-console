@@ -1,7 +1,7 @@
 import "dotenv/config";
 import SrConsole from "./lib/SrConsole.js";
 import iSrConfig from "./interface/iSrConfig.js";
-import iSrTime, { iDateMode } from "./interface/iSrTime.js";
+import { iDateMode } from "./interface/iSrTime.js";
 import SrPrint from "./lib/SrPrint.js";
 import Processor from "./handlers/processor.js";
 
