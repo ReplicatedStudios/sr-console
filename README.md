@@ -1,3 +1,7 @@
+Rapida, simple y colorida. Una herramienta para mejorar tus `console.log()`
+
+<br>
+
 [![sr-console](https://snyk.io/advisor/npm-package/sr-console/badge.svg)](https://snyk.io/advisor/npm-package/sr-console)
 [![npm version](https://badge.fury.io/js/sr-console.svg)](https://badge.fury.io/js/sr-console)
 ![GitHub last commit](https://img.shields.io/github/last-commit/SrRapero720/sr-console)
