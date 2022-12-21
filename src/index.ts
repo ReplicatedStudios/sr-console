@@ -1,30 +1,53 @@
 import "dotenv/config";
 import SrConsole from "./lib/SrConsole.js";
-import SrConsoleLib from "./lib/SrConsole.js";
-import SrTime from "./util/SrTime.js";
+import iSrConfig from "./interface/iSrConfig.js";
+import iSrTime, { iDateMode } from "./interface/iSrTime.js";
+import SrPrint from "./lib/SrPrint.js";
+import Processor from "./handlers/processor.js";
 
-interface Console extends SrConsoleLib {
-    groupEnd(): void;
-    groupEnd(message: string): void;
-}
+/**
+SRCONSOLE_LIST_USE_FILTER=xxxxx-yyyyy|nigga
+
+SRCONSOLE_MODE_TIME=DMAX
+
+SRCONSOLE_FILE_DIR=./logs
+SRCONSOLE_FILE_USE=false
+SRCONSOLE_FILE_RAW_USE=false
+
+SRCONSOLE_HTML5_USE=false
+SRCONSOLE_PREFIX_USE=false
+SRCONSOLE_OVERRIDE=true
+*/
 
 const env = process.env;
-
-const unwords = env.SR_FILTER ? env.SR_FILTER?.split('|') : [];
-const time = env.SR_TIME ? (typeof env.SR_TIME === "number" ? env.SR_TIME : SrTime.F_BASIC) : SrTime.F_BASIC;
-const h5 = env.SR_HTML5 ? (typeof env.SR_HTML5 === "boolean" ? env.SR_HTML5 : false) : false
-const logs = {
-    ACTIVE: typeof env.SR_FILELOG === "boolean" ? env.SR_FILELOG : false,
-    PATH: env.SR_FILEPATH ?? "/logs/",
-    NAME: env.SR_FILENAME ?? "console.txt"
+const override = env.SRCONSOLE_OVERRIDE;
+const config: iSrConfig = {
+    FILTER: env.SRCONSOLE_LIST_USE_FILTER ? env.SRCONSOLE_LIST_USE_FILTER.split('|') : [],
+    TIME: <keyof iDateMode>env.SRCONSOLE_MODE_TIME ?? "DBASIC", // POR DEFECTO USA EL BASIC INCLUSO SI SE INGRESA MAL
+    FILE_DIR: env.SRCONSOLE_FILE_DIR ?? "./logs/",
+    FILE_USE: !(!env.SRCONSOLE_FILE_USE) || env.SRCONSOLE_FILE_USE === "true",
+    FILE_USE_RAW: !(!env.SRCONSOLE_FILE_RAW_USE) || env.SRCONSOLE_FILE_RAW_USE === "true",
+    HTML5: !(!env.SRCONSOLE_HTML5_USE) || env.SRCONSOLE_HTML5_USE === "true",
+    LOG_PREFIX: !(!env.SRCONSOLE_PREFIX_USE),
 };
 
+declare global { 
+    var LOG: SrConsole;
+    var PRINT: SrPrint;
+    interface Console extends SrConsole {}
+}
+
+global.LOG = new SrConsole(config);
+globalThis.LOG = new SrConsole(config);
+
+global.PRINT = LOG.defaultPrint;
+globalThis.PRINT = LOG.defaultPrint;
 
 // @ts-expect-error
-global.SrConsole = SrConsoleLib;
-// @ts-expect-error
-global.Console = SrConsoleLib;
-// @ts-expect-error
-global.console = new SrConsoleLib(new SrConsoleLib.SrConfig(unwords, time, h5, logs));
+if (!(override != undefined) || override) global.console = global.LOG;
+// HANDLERS
+new Processor(PRINT);
 
-export default SrConsoleLib;
+// @ts-expect-error
+export = SrConsole;
+export default SrConsole;

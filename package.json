@@ -1,15 +1,21 @@
 {
   "name": "sr-console",
-  "version": "0.20.0-ALPHA",
+  "version": "1.1.0",
   "description": "Modulo mejorado de la consola de node.js",
-  "main": "./build/index.js",
-  "module": "./module/index.js",
-  "bin": "./src/bin/index",
+  "main": "./common/build/index.js",
+  "module": "./modules/build/index.js",
   "scripts": {
-    "build": "tsc -p ./tsconfig.json && tsc -p ./zbuild.tsconfig.json",
-    "test:main": "tsc && node testing/main.test.js"
+    "build:all": "npm run build:modules && npm run build:commonjs",
+    "build:modules": "tsc -p ./modules/tsconfig.json",
+    "build:commonjs": "tsc -p ./common/tsconfig.json",
+
+    "test:basics": "tsc && node testing/basics.test.js",
+    "test:complex": "tsc && node testing/basics.test.js",
+    "test:lastest": "tsc && node testing/basics.test.js",
+
+    "publishing": "npm run build:all && npm publish"
   },
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
     "@types/socket.io": "^3.0.2",
     "dotenv": "^16.0.3",
@@ -19,12 +25,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Zixasis/sr-console.git"
+    "url": "git+https://github.com/SrRapero720/sr-console.git"
   },
   "bugs": {
-    "url": "https://github.com/Zixasis/sr-console/issues"
+    "url": "https://github.com/SrRapero720/sr-console/issues"
   },
-  "homepage": "https://github.com/Zixasis/sr-console#readme",
+  "homepage": "https://github.com/SrRapero720/sr-console#readme",
   "os": [
     "win32",
     "linux"
@@ -33,5 +39,8 @@
     "Console",
     "Node.Console",
     "VoxelatedHost"
-  ]
+  ],
+  "devDependencies": {
+    "@types/node": "^18.11.10"
+  }
 }

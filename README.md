@@ -1,106 +1,131 @@
-# LOS MODALES HACEN A LA CONSOLA
-Una libreria que le da mas color a la consola de tu aplicacion para que sea facilmente comprensible, incluyendo herramientas utiles.
-Bastante poderosa y requiere poca configuracion. Deja atras el complicarte en leer archivos de Log de tu codigo o saber cuando ocurrio el error, ahora puedes tener todo mas organizado y facil de
-previsualizar
+# INICIALIZACION
+## Instalacion
+```cmd
+npm i sr-console
+```
 
-
-### ``MODULO EN BETA``
-
-### = CHANGELOG 0.14.2 - BETA =
-- Se implemento soporte a ES5/commonjs ( ``require('module')``) y a su vez soporte a ESNext (``import 'module'``)
-- Correccion de errores menores y mejoras en el codigo
-
-## INICIALIZACION
-Commonjs
+## Preparacion
+Esto va al inicio de tu archivo index.js o index.ts
 ```ts
-require('sr-console');
-```
-ES6 / ESNEXT
-```ts
-import "sr-console";
-```
-Archivo `.env` de tu Proyecto
-```env
-# Filtro de palabras/claves en .send(). Separados con el simbolo "|" - DEFAULT 
-SR_CONSOLE_FILTER="bad word|nword"
+import "sr-console"; // MODULE (EJ5 / ESNEXT)
+require('sr-console'); // COMMONJS
 
-# Formato de fecha y hora al inicio de cada log
-# long | short | basic | none - DEFAULT: simple
-SR_CONSOLE_TIME=short
-
-# Activar registro de logs en la carpeta de tu proyecto - DEFAULT: false
-SR_CONSOLE_LOG=true
+// TODO SE GUARDA EN LAS VARIABLES GLOBALES
+console.send("data");
+LOG.send("data");
 ```
-## FUNCIONES BASICAS
+<br>
+
+# CONFIGURACION (`.env`)
+Importante: Si estas usando un archivo .env deberas situarlo en la raiz del proyecto<br>
+Consulta la documentacion de la configuracion `.env` en el [repositorio](https://github.com/SrRapero720/sr-console/blob/recreacion/.env)
+<br><br>
+
+# FUNCIONES BASICAS
 La libreria cuenta con casi todas las funciones que existen en la clase `Console` original.
 Aqui un ejemplo de todas las funciones con los colores que muestran y los valores que returnan
-```js
-console.send('Hola enorme terrible y abominable Mundo!'); // [00:28:46] Hola enorme y Mundo! - Azul
-console.log('Hola Mundo'); // [00:28:46] Hola Mundo - Azul
-console.warn('Hola Peligroso Mundo'); // [00:28:46] Hola Peligroso Mundo - Amarillo
-console.debug('Hola problematico mundo'); // [00:28:46] Hola problematico mundo - Celeste
-console.err('Hola Erroneo Mundo'); // [00:28:46] Hola Erroneo Mundo - Rojo
-console.error('Hola alias de Erroneo Mundo'); // [00:28:46] Hola alias de Erroneo Mundo - Rojo
-console.success('Hola exitoso mundo'); // [00:28:46] Hola exitoso mundo - Verde
-console.trace('Hola guiado mundo'); // Trace: [00:28:46] Hola guiado mundo at... - Fondo rojo / Amarillo
-console.group("Hola Agrupado Mundo!") // [00:28:46] Hola Agrupado mundo - Magenta
 
+### CODIGO
+```js
+// COMMONJS
+require("sr-console");
+// MODULE (EJ5 / EJNEXT)
+import "sr-console";
+
+// NOTA: ES VALIDO SI USAS console.any() SIEMPRE Y CUANDO ESTE ACTIVADO EN EL .env EL SOBREESCRIBIR console
+LOG.time();
+LOG.warn("Iniciando demostracion de SR-CONSOLE");
+LOG.warn("La implementacion puede estar a medias");
+LOG.log("Cargando servidor ficticio");
+LOG.log("Revisando informacion");
+LOG.success("Toda la informacion fue validada");
+LOG.group("Cargando registros")
+LOG.debug("Se han detectado", 393, "registros");
+LOG.debug("Importando registros");
+LOG.debug("Indexandolos al nucleo del servidor");
+LOG.group("Revision de registros")
+LOG.err("Se detectaron 43 registros no validos o dañados");
+LOG.info("Se intento reparar 43 registros");
+LOG.warn("Existen", 4, "registros que se encuentran en un estado critico e irreparable")
+LOG.unGroup("Se han cargado con exito", 350, "registros");
+
+LOG.warn("Iniciando servidor");
+LOG.log("Iniciando sesion");
+LOG.send("Enviando Token NIGGA-XXXXXX-XXXXX");
+LOG.success("Se ha iniciado session exitosamente")
+
+LOG.info("Estan pendientes los",43, "registros sin cargar");
+LOG.info("el servidor se encuentra usando 60gb de ram")
+LOG.info("no se pudo procesar el modelo del procesador, se utilizo el modo seguro");
 setTimeout(() => {
-    console.fatalError(new Error('Errores graves').stack); // [00:28:46] Error: Errores graves - Fondo rojo / Amarillo
-    console.ferror() /* ALIAS */
-}, 2000)
+    LOG.timeEnd();
+    LOG.fatalBack(new Error("FATAL ERROR OCURRED ON SYSTEM REGISTRY"));
+    LOG.log("recuperado");
+    LOG.warn("oh no");
+    LOG.err("no me siento bien");
+    throw new Error("Finalizado");
+}, 2000);
 ```
 
-## UTILIDADES
-Principales funciones del modulo
-- Agregar Dia y hora | **LISTO**
-- Colorear logs respectivamente la funcion | **LISTO**
-- Emitir consola via Websockets | **LISTO**
-- Calcular uso de memoria cada console.any(); | **LISTO**
+### RESULTADO
+<img src="https://i.imgur.com/X21ulSx.png">
+
+<br>
+<br>
+<!-- `[FIX]` `[ENH]` `[NEW]` -->
+
+# CHANGELOG
+- RELEASE: 1.1.0
+    - `[FIX]` Se arreglo errores en espaciado de `PRINT.send("U", "message from any")`
+    - `[ENH]` Metodo `SrConsole.color()` como alias de `SrConsole.iSrColors.get()`
+    - `[ENH]` Metodo `SrConsole.colorRex()` como alias de `SrConsole.iSrColors.rex()`
+    - `[ENH]` Las funciones destacadas ahora estan documentadas sobre el resto de funciones
+<br>
+<br>
+
+# FUNCIONES PRINCIPALES
+## COLORES EN CONSOLA
+Toda salida de informacion hacia la consola se vera representada con una paleta de colores unica para mejorar la lectura
+
+## ARCHIVOS DE LOG
+No pierdas que causo el crasheo. SR-CONSOLE puede generar archivos .log que retienen toda la informacion de salida
+
+## `[PLUGIN]` SRPRINT
+Un plugin integrado en la libreria, su uso es bastante sencillo
+```js
+const PRINT = new LOG.SrPrint("SYSTEM");
+PRINT.send("L", "My cool output"); // Salida: [00:00:00][SYSTEM]: My cool output
+PRINT.subPrinter("MY-SUBPRINT"); // Crea un SRPRINT con base al primero ->[00:00:00][SYSTEM/MY-SUBPRINT]: My cool output
+```
+
+# WORK IN PROGRESS
 - Permitir Objetos Circulares
-- Dar formato automatico a objetos
-- Guardar los registros en un archivo dentro del proyecto | **LISTO**
-- Filtrar palabras que no deberian verse en los logs | **LISTO**
-- Colorizar tipo de datos en 1 sola linea .log('Numero:', 1) | **LISTO**
-- Convertir string a color a elemento HTML con estilo | **CON BUGS**
-- Si desea aportar una utilidad importante abrir un [issue](https://github.com/Zixasis/sr-console/issues) en Github
+- Colores de 8-bits (256)
+- Combinacion de colores basicos y de 8-bits para consolas como la CMD.exe
+- Decoradores para typescript
+- Dar formato automatico a Objects y Arrays
+- Proteger todas las variables del `.env` de ser mostradas en consola
+- Enviar comandos usando `childProcess` por medio de websockets
+- Crear copia de `console.table()` mas userFriendly
+<br>
+<br>
 
-
-# SR-CONSOLE x [SOCKET.IO](https://www.npmjs.com/package/socket.io)
-Instaciamos nuestra consola y creamos nuestro servidor websocket, despues usamos la funcion `.SocketIO()` y le agregamos como parametro el servidor websocket
+# INTEGRACIONES
+## SrConsole x [SocketIO](https://www.npmjs.com/package/socket.io)
+Puedes implementar tu servidor SOCKET.IO 
 ```js
 const SocketIO = require('socket.io');
 const io = SockeIO();
+LOG.setSocketIO(io);
 
-console.SocketIO(io);
+/* Detectar la salida de la consola */
+socket.on('console:in', data => {}); // INPUTS (no util por ahora)
+socket.on('console:out', data => {}); // OUTPUTS
+socket.on('console:err', data => {}); // OUTPUTS DE ERROR
 ```
 
-Para escuchar nuevas entradas en la consola solo debemos usar la siguiente linea de codigo.
-```js
-socket.on('console:out', data => {
-    // OUTPUTS NORMALES
-});
-socket.on('console:in', data => {
-    // OUTPUTS DE ENTRADA
-});
-socket.on('console:err', data => {
-    // OUTPUTS DE ERROR
-});
-```
-
-# SR-CONSOLE x [DOTENV](https://www.npmjs.com/package/dotenv)
-Al usar `sr-console` ya no necesitas importar la libreria [dotenv](https://www.npmjs.com/package/dotenv), `sr-console` lo hace por ti.
-#### Limitaciones
-- No puedes cambiar la configuracion
-  - Se usara la por defecto de [dotenv](https://www.npmjs.com/package/dotenv)
-- No estan las utilidades para convertir elementos `.env` dentro del codigo a `Object()`
-
-## PROXIMO A ACTUALIZAR
-- Documentar correctamente las funciones
-- Corregir error al convertir el unicode de color a elemntos HTML
-- Resolver problemas de rendimiento al ejecutar ciertas funciones
-- Implementar `EventEmitter` como herramienta [ahorrar codigo]
-- Finalizar funciones default de la clase original `Console`
-
-## EN DESARROLLO
-Aun estoy trabajando en la libreria. por lo que estare haciendo cambios bastante bruscos en el codigo y en como se redacta con cada cambio realizado hasta que finalice la version ``1.0.0`` En caso de que la libreria presente algun problema puedes visitar el [Repositorio](https://github.com/Zixasis/sr-console#readme)
+## SrConsole x [DotEnv](https://www.npmjs.com/package/dotenv)
+Al usar `sr-console` ya no necesitas importar la libreria [dotenv](https://www.npmjs.com/package/dotenv), ya lo hace por ti. <br>
+sin embargo cuenta con algunas restricciones.
+- No puedes cambiar la configuracion de dotenv
+- No estan las utilidades para convertir elementos del `.env` a un `Object()`

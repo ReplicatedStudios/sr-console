@@ -8,3 +8,4 @@ logs
 # FILES
 **/*.tsbuildinfo
 *.txt
+*.log
