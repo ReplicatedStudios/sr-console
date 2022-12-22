@@ -22,12 +22,14 @@ export default class iSrTime extends Date {
             days: this.getDay(),
             hours: this.getHours(),
             min: this.getMinutes(),
-            sec: this.getSeconds()
+            sec: this.getSeconds(),
+            mill: this.getMilliseconds(),
         }
+
         switch (this.#format) {
             case iSrTime.DATEMODES.DOFF:return "";
             case iSrTime.DATEMODES.DMIN:return `[${iSrTime.MONTHS[T.months]} ${T.days <= 9 ? '0' + T.days : T.days} ${T.hours <= 9 ? '0' + T.hours : T.hours}:${T.min <= 9 ? '0' + T.min : T.min}:${T.sec <= 9 ? '0' + T.sec : T.sec}]`;
-            case iSrTime.DATEMODES.DMAX:return `[${iSrTime.MONTHS[T.months]} ${T.days <= 9 ? '0' + T.days : T.days}, ${T.year} ${T.hours <= 9 ? '0' + T.hours : T.hours}:${T.min <= 9 ? '0' + T.min : T.min}:${T.sec <= 9 ? '0' + T.sec : T.sec}]`;
+            case iSrTime.DATEMODES.DMAX:return `[${iSrTime.MONTHS[T.months]} ${T.days <= 9 ? '0' + T.days : T.days}, ${T.year} ${T.hours <= 9 ? '0' + T.hours : T.hours}:${T.min <= 9 ? '0' + T.min : T.min}:${T.sec <= 9 ? '0' + T.sec : T.sec}.${T.mill}]`;
             default:return `[${T.hours <= 9 ? '0' + T.hours : T.hours}:${T.min <= 9 ? '0' + T.min : T.min}:${T.sec <= 9 ? '0' + T.sec : T.sec}]`;
         }
     }
