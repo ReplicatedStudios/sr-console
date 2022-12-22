@@ -22,6 +22,7 @@ export default class SrConsole {
     static #timers: { [key: string]: Date } = {};
     static #config: iSrConfig;
     static #groups = 0;
+    static #prefixGroup = "• ";
 
     /** Clase por defecto de SrConsole, No utilizar la clase para sub-instanciar nuevas consolas durante el tiempo de ejecucion
      * la clase no fue diseñada para ser instanciada mas de una vez*/
@@ -43,8 +44,9 @@ export default class SrConsole {
         for (let i = 0; i < data.values.length; i++) data.values.push(iSrColors.parseTypeof(data.values.shift(), data.colors));
 
         // BUILD
-        const groups = "• ".repeat(this.#groups);
-        const prefix = new iSrTime(this.#config.TIME).toString() + (this.#config.LOG_PREFIX ? data.prefix : "");
+        const groups = this.#prefixGroup.repeat(this.#groups);
+        const timestamp = new iSrTime(this.#config.TIME);
+        const prefix = (this.#config.LOG_PREFIX ? `${timestamp.toString().length == 0 ? timestamp : timestamp + " "}${data.prefix}` : timestamp);
         const logs = data.values.join(" ").replace(/\n/gi, "\n" + "• ".repeat(this.#groups));
 
         const output = `${iSrColors.get("MAGENTA").concat(groups)}${data.colors}${prefix == "" ? "::" : prefix + ":"} ${logs}${iSrColors.get("TRESET")}\n`;
@@ -75,7 +77,7 @@ export default class SrConsole {
         if (typeof socket.send === "function") { 
             SrConsole.#print(new PrintObject("err", "SR-CONSOLE", iSrColors.get("RED"), "No se pudo instalar el Socket a la consola")); return false;
         } else { 
-            SrConsole.#print(new PrintObject("out", "SR-CONSOLE", iSrColors.get("RED"), "Se monto el Socket a la consola exitosamente")); return true; 
+            SrConsole.#print(new PrintObject("out", "SR-CONSOLE", iSrColors.get("GREEN", "TBRIGHT"), "Se monto el Socket a la consola exitosamente")); return true; 
         }
     }
 
