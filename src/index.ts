@@ -25,10 +25,10 @@ const config: iSrConfig = {
     FILTER: env.SRCONSOLE_LIST_USE_FILTER ? env.SRCONSOLE_LIST_USE_FILTER.split('|') : [],
     TIME: <keyof iDateMode>env.SRCONSOLE_MODE_TIME ?? "DBASIC", // POR DEFECTO USA EL BASIC INCLUSO SI SE INGRESA MAL
     FILE_DIR: env.SRCONSOLE_FILE_DIR ?? "./logs/",
-    FILE_USE: !(!env.SRCONSOLE_FILE_USE) || env.SRCONSOLE_FILE_USE === "true",
-    FILE_USE_RAW: !(!env.SRCONSOLE_FILE_RAW_USE) || env.SRCONSOLE_FILE_RAW_USE === "true",
-    HTML5: !(!env.SRCONSOLE_HTML5_USE) || env.SRCONSOLE_HTML5_USE === "true",
-    LOG_PREFIX: !(!env.SRCONSOLE_PREFIX_USE),
+    FILE_USE: env.SRCONSOLE_FILE_USE === "true",
+    FILE_USE_RAW: env.SRCONSOLE_HTML5_USE === "true",
+    HTML5: env.SRCONSOLE_HTML5_USE === "true",
+    LOG_PREFIX: env.SRCONSOLE_PREFIX_USE === "true",
 };
 
 declare global { 

@@ -27,10 +27,12 @@ console.info("Estan pendientes los",43, "registros sin cargar");
 console.info("el servidor se encuentra usando 60gb de ram")
 console.info("no se pudo procesar el modelo del procesador, se utilizo el modo seguro");
 
-stdout.write("\x1b[38;2;255;100;0mTRUECOLOR\x1b[0m\n");
-stdout.write("\x1b[38;5;177mCOLORED\x1b[0m\n");
-stdout.write("\x1b[38;5;183mCOLORED\x1b[0m\n");
-stdout.write("\x1b[38;5;219mCOLORED\x1b[0m\n");
+console.log({ out: "vanish", data: void 1, howto: 5541 })
+
+// stdout.write("\x1b[38;2;255;100;0mTRUECOLOR\x1b[0m\n");
+// stdout.write("\x1b[38;5;177mCOLORED\x1b[0m\n");
+// stdout.write("\x1b[38;5;183mCOLORED\x1b[0m\n");
+// stdout.write("\x1b[38;5;219mCOLORED\x1b[0m\n");
 setTimeout(() => {
     console.timeEnd();
     console.fatalBack(new Error("FATAL ERROR OCURRED ON SYSTEM REGISTRY"));

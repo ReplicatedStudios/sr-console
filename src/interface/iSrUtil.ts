@@ -10,15 +10,18 @@ export interface PrintData {
     readonly std: iStd;
     readonly colors: string;
     readonly values: any[];
+    readonly prefix: string;
 }
 
 export class PrintObject implements PrintData {
     public readonly std: iStd;
     public readonly colors: string;
     public readonly values: any[];
-    constructor(std: iStd, colors: string, values: any[]) {
+    public readonly prefix: string;
+    constructor(std: iStd, prefix: string, colors: string, ...values: any[]) {
         this.std = std;
         this.colors = colors;
         this.values = values;
+        this.prefix = `[${prefix}]`;
     }
 }

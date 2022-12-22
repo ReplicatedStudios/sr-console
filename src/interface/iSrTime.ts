@@ -7,13 +7,8 @@ export interface iDateMode {
 }
 
 export default class iSrTime extends Date {
-    public static DATEMODES: iDateMode = {
-        DBASIC: 0,
-        DMIN: 1,
-        DMAX: 2,
-        DOFF: 3
-    }
-    public static readonly MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    public static readonly DATEMODES: iDateMode = { DBASIC: 0, DMIN: 1, DMAX: 2, DOFF: 3 }
+    public static readonly MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
     readonly #format: valueof<iDateMode>;
     constructor(format: keyof iDateMode) {
         super();
@@ -31,8 +26,8 @@ export default class iSrTime extends Date {
         }
         switch (this.#format) {
             case iSrTime.DATEMODES.DOFF:return "";
-            case iSrTime.DATEMODES.DMIN:return `[${iSrTime.MONTHS[T.months]} ${T.days <= 9 ? '0' + T.days : T.days}] [${T.hours <= 9 ? '0' + T.hours : T.hours}:${T.min <= 9 ? '0' + T.min : T.min}:${T.sec <= 9 ? '0' + T.sec : T.sec}]`;
-            case iSrTime.DATEMODES.DMAX:return `[${iSrTime.MONTHS[T.months]} ${T.days <= 9 ? '0' + T.days : T.days}, ${T.year}] [${T.hours <= 9 ? '0' + T.hours : T.hours}:${T.min <= 9 ? '0' + T.min : T.min}:${T.sec <= 9 ? '0' + T.sec : T.sec}]`;
+            case iSrTime.DATEMODES.DMIN:return `[${iSrTime.MONTHS[T.months]} ${T.days <= 9 ? '0' + T.days : T.days} ${T.hours <= 9 ? '0' + T.hours : T.hours}:${T.min <= 9 ? '0' + T.min : T.min}:${T.sec <= 9 ? '0' + T.sec : T.sec}]`;
+            case iSrTime.DATEMODES.DMAX:return `[${iSrTime.MONTHS[T.months]} ${T.days <= 9 ? '0' + T.days : T.days}, ${T.year} ${T.hours <= 9 ? '0' + T.hours : T.hours}:${T.min <= 9 ? '0' + T.min : T.min}:${T.sec <= 9 ? '0' + T.sec : T.sec}]`;
             default:return `[${T.hours <= 9 ? '0' + T.hours : T.hours}:${T.min <= 9 ? '0' + T.min : T.min}:${T.sec <= 9 ? '0' + T.sec : T.sec}]`;
         }
     }

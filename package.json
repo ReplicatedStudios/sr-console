@@ -8,9 +8,9 @@
     "build:all": "npm run build:modules && npm run build:commonjs",
     "build:modules": "tsc -p ./modules/tsconfig.json",
     "build:commonjs": "tsc -p ./common/tsconfig.json",
-    "test:basics": "tsc && node testing/basics.test.js",
-    "test:complex": "tsc && node testing/basics.test.js",
-    "test:lastest": "tsc && node testing/basics.test.js",
+    "test:basics": "npm run build:all && node testing/basics.test.js",
+    "test:complex": "npm run build:all && node testing/basics.test.js",
+    "test:lastest": "npm run build:all && node testing/basics.test.js",
     "publishing": "npm run build:all && npm publish"
   },
   "type": "commonjs",
