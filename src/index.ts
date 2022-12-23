@@ -44,9 +44,9 @@ global.PRINT = LOG.defaultPrint;
 globalThis.PRINT = LOG.defaultPrint;
 
 // @ts-expect-error
-if (!(override != undefined) || override) global.console = global.LOG;
-// HANDLERS
-new Processor(PRINT);
+if (!override || override === "" || override === "true" || override !== "false") global.console = global.LOG;
+// HANDLERS EXPERIMENTALES
+if (env.SRCONSOLE_EXPERIMENTALS === "true") new Processor(PRINT);
 
 // @ts-expect-error
 export = SrConsole;

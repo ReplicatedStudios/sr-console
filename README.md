@@ -81,14 +81,30 @@ setTimeout(() => {
 <!-- `[FIX]` `[ENH]` `[NEW]` -->
 
 # CHANGELOG
-- RELEASE: 1.1.4
+- RELEASE: 1.1.5
     - `[FIX]` DMAX ya muestra los milisegundos
     - `[FIX]` Espaciados se aplicaban donde no con cierta configuracion
     - `[FIX]` Arreglo en la documentacion para SocketIO
     - `[ENH]` El archivo log con colores ahora es por sesion (raw sigue siendo permanente)
     - `[ENH]` Formato especial a [(Function: name)]
+    - `[FIX-ENH-NEW]` Nueva variable `SRCONSOLE_EXPERIMENTALS` agregada al `.env`. Esto resuelve el problema en el que si ocurre un error no capturado el codigo seguia ejecutandose, no estaba intencionado, ya que era parte de una funcion nueva pero que no dio ese comportamiento en las pruebas internas con otros proyectos. se utilizara en futuras funciones que se vayan documentando
 <br>
 <br>
+
+# VERSION 1.2.0 - Nuevas instancias
+De una forma breve, la razon por la que diseñe `SR-CONSOLE` para hacer mas agradable los logs de
+mis bots de discord, sin embargo (aparte de que ya no hago bots de discord) algo que frecuentaba mucho yo al codear (y que varios modulos de npm frecuentan) es meter a los `Promises.catch()` el `console.err` a secas o tambien acaparan las variables console a lo brusco
+
+Por ese motivo `SR-CONSOLE` no se podia instanciar 2 veces, todo recaia en sus metodos estaticos de su clase principal y no en otras variables en `this`, al meter la funcion a secas pierde la nocion de que instancia viene, y al intentar utilizar elementos de esa instancia solo obtiene que `this` es `undefined`
+
+<strong>ERRORES POR VENIR</strong><br>
+La actualizacion 1.2.0 permitira reinstancias de `SR-CONSOLE` y posiblemente MUCHOS errores se vendran si utilizas `console.func` a secas para capturar los
+mensajes de error. DEJA DE HACER ESO, en su lugar usa `err => console.err(err);`
+
+Si alguna libreria que utilizas recae en esta mala praxis (generalmente para crear PRINTERS), abrir un issue en el [REPOSITORIO](https://github.com/SrRapero720/sr-console) para solucionarlo con el otro autor.
+
+<strong>PARA CREADORES DE MODULOS</strong><br>
+puedes utilizar `new console.SrPrint("MY-MODULE");` como sustituto eficaz al printer que utilizas, su documentacion esta indicada en PRINT.send para enviar errores o advertencias
 
 # PLUGINS
 `[PLUGIN]` SRPRINT

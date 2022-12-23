@@ -66,6 +66,7 @@ export default class SrConsole {
         else throw new Error("No STD string specified");
     }
 
+    public readonly Console: typeof SrConsole = SrConsole;
     public readonly SrConsole: typeof SrConsole = SrConsole;
     public readonly SrPrint: typeof SrPrint = SrPrint;
     public readonly iSrColors: typeof iSrColors = iSrColors;
@@ -148,7 +149,9 @@ export default class SrConsole {
     }
 
     /** Elimina todos los grupos activos. no emitira nada si no hay grupos activos */
-    public groupEnd(message: any): void { this.groupCollapsed(message); }
+    public groupEnd(): void;
+    public groupEnd(message: any): void;
+    public groupEnd(message?: any): void { this.groupCollapsed(message ?? "<--"); }
     public info(message: any, ...optionalParams: any[]): void {
         SrConsole.#print(new PrintObject("out", "INFO", iSrColors.get("CYAN"), message, ...optionalParams));
     }
