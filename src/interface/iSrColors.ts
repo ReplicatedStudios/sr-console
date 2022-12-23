@@ -83,8 +83,8 @@ export default class iSrColors {
             case 'number': return `${this.get("GREEN")}${data}${this.get("TRESET")}`;
             case 'boolean': return `${this.get("BLUE", "TBRIGHT")}${data ? "true" : "false"}${this.get("TRESET")}`;
             case 'bigint': return `${this.get("GREEN")}${data}${this.get("TRESET")}`;
-            case 'function': return `${this.get("YELLOW")}${data.name == "" ? this.get("BLACK", "TBRIGHT") + "annonymous" : data.name}${this.get("TRESET")}`;
-            case 'object': return `${this.get("CYAN")}${JSON.stringify(data, null, 4)}${this.get("TRESET")}`;
+            case 'function': return `${this.get("YELLOW")}[(Function: ${data.name == "" ? this.get("BLACK", "TBRIGHT") + "Annonymous" : defaults + data.name}${this.get("YELLOW")})]${this.get("TRESET")}`;
+            case 'object': return `${this.get("CYAN")}[{Object}]: ${JSON.stringify(data, null, 4)}${this.get("TRESET")}`;
             case 'symbol': return `${this.get("MAGENTA")}${data.toString()}${this.get("TRESET")}`;
             case 'undefined': return `${this.get("BLACK", "TBRIGHT", "TUNDERSCORE")}undefined${this.get("TRESET")}`;
         }
