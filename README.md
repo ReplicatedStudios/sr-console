@@ -81,12 +81,12 @@ setTimeout(() => {
 <!-- `[FIX]` `[ENH]` `[NEW]` -->
 
 # CHANGELOG
-- RELEASE: 1.1.1
-    - `[FIX]` Se arreglo errores en espaciado de `PRINT.send("U", "message from any")`
-    - `[ENH]` Metodo `SrConsole.color()` como alias de `SrConsole.iSrColors.get()`
-    - `[ENH]` Metodo `SrConsole.colorRex()` como alias de `SrConsole.iSrColors.rex()`
-    - `[ENH]` Las funciones destacadas ahora estan documentadas sobre el resto de funciones
-    - `[ENH]` GIT: Merged branch recreacion -> main (deleted)
+- RELEASE: 1.1.4
+    - `[FIX]` DMAX ya muestra los milisegundos
+    - `[FIX]` Espaciados se aplicaban donde no con cierta configuracion
+    - `[FIX]` Arreglo en la documentacion para SocketIO
+    - `[ENH]` El archivo log con colores ahora es por sesion (raw sigue siendo permanente)
+    - `[ENH]` Formato especial a [(Function: name)]
 <br>
 <br>
 
