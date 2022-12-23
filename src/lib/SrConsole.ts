@@ -31,7 +31,7 @@ export default class SrConsole {
         const logdir = path.join(cwd(), config.FILE_DIR);
 
         if (!fs.existsSync(logdir)) fs.mkdirSync(logdir, { recursive: true });
-        if (config.FILE_USE) SrConsole.FILELOG = fs.createWriteStream(path.join(logdir, "lastest.log"), { encoding: "utf-8", flags: "a" });
+        if (config.FILE_USE) SrConsole.FILELOG = fs.createWriteStream(path.join(logdir, "lastest.log"), { encoding: "utf-8", flags: "w" });
         if (config.FILE_USE_RAW) SrConsole.FILERAW = fs.createWriteStream(path.join(logdir, "raw.log"), { encoding: "utf-8", flags: "a" });
         if (config.HTML5) SrConsole.FILEHTML5 = fs.createWriteStream(path.join(logdir, "lastest.html"), { encoding: "utf-8", flags: "w" });
 
