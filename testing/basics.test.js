@@ -26,8 +26,11 @@ console.success("Se ha iniciado session exitosamente")
 console.info("Estan pendientes los",43, "registros sin cargar");
 console.info("el servidor se encuentra usando 60gb de ram")
 console.info("no se pudo procesar el modelo del procesador, se utilizo el modo seguro");
+console.debug(() => "hi threre");
+console.debug(() => { "nothing there" });
+console.send(function nonAnnonymal(name) { })
 
-console.log({ out: "vanish", data: void 1, howto: 5541 })
+console.log({ out: "vanish", data: true, howto: 5541, nonfunction: () => { return "i am a darn function" }, nonsymb: Symbol("i am a darn symbol") });
 
 // stdout.write("\x1b[38;2;255;100;0mTRUECOLOR\x1b[0m\n");
 // stdout.write("\x1b[38;5;177mCOLORED\x1b[0m\n");
