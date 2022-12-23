@@ -121,9 +121,9 @@ const io = SockeIO();
 LOG.setSocketIO(io);
 
 /* Detectar la salida de la consola */
-socket.on('console:in', data => {}); // INPUTS (no util por ahora)
-socket.on('console:out', data => {}); // OUTPUTS
-socket.on('console:err', data => {}); // OUTPUTS DE ERROR
+socket.on('srconsole:in', data => {}); // INPUTS (no util por ahora)
+socket.on('srconsole:out', data => {}); // OUTPUTS
+socket.on('srconsole:err', data => {}); // OUTPUTS DE ERROR
 ```
 
 ## SrConsole x [DotEnv](https://www.npmjs.com/package/dotenv)
