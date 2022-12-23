@@ -81,7 +81,8 @@ setTimeout(() => {
 <!-- `[FIX]` `[ENH]` `[NEW]` -->
 
 # CHANGELOG
-- RELEASE: 1.1.5
+- RELEASE: 1.1.6
+    - `[FIX]` `setSocketIO()` detectaba como invalido un socket valido
     - `[FIX]` DMAX ya muestra los milisegundos
     - `[FIX]` Espaciados se aplicaban donde no con cierta configuracion
     - `[FIX]` Arreglo en la documentacion para SocketIO

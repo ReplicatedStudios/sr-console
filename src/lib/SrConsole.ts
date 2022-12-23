@@ -75,10 +75,15 @@ export default class SrConsole {
     public get memory() { return Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100; }
     public get defaultPrint() { return SrConsole.#DEFAULTPRINT; }
     public setSocketIO(socket: Socket.Server) {
-        if (typeof socket.send === "function") { 
-            SrConsole.#print(new PrintObject("err", "SR-CONSOLE", iSrColors.get("RED"), "No se pudo instalar el Socket a la consola")); return false;
+        if (typeof socket.send !== "function") {
+            if (!SrConsole.#config.LOG_PREFIX) SrConsole.#print(new PrintObject("err", "SR-CONSOLE", iSrColors.get("RED"), "No se pudo instalar el Socket en la consola"));
+            else SrConsole.#DEFAULTPRINT.send("E", "No se pudo instalar el Socket en la consola")
+            return false;
         } else { 
-            SrConsole.#print(new PrintObject("out", "SR-CONSOLE", iSrColors.get("GREEN", "TBRIGHT"), "Se monto el Socket a la consola exitosamente")); return true; 
+            SrConsole.IO = socket;
+            if (!SrConsole.#config.LOG_PREFIX) SrConsole.#print(new PrintObject("out", "SR-CONSOLE", iSrColors.get("GREEN", "TBRIGHT"), "Se monto el Socket en la consola exitosamente"));
+            else SrConsole.#DEFAULTPRINT.send("S", "Se monto el Socket a la consola exitosamente")
+            return true;
         }
     }
 
