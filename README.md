@@ -81,7 +81,8 @@ setTimeout(() => {
 <!-- `[FIX]` `[ENH]` `[NEW]` -->
 
 # CHANGELOG
-- RELEASE: 1.1.6
+- RELEASE: 1.1.7
+    - `[FIX]` SrPrint.send("S") se comportaba como un `console.send` en lugar de `console.success`
     - `[FIX]` `setSocketIO()` detectaba como invalido un socket valido
     - `[FIX]` DMAX ya muestra los milisegundos
     - `[FIX]` Espaciados se aplicaban donde no con cierta configuracion
