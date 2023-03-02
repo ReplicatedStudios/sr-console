@@ -1,5 +1,10 @@
 const SrPrint = require("../common/build/index.js");
 
+const b = 6
+const g = 6
+const r = 6
+console.log(16 + 36 * r + 6 * g + b);
+
 
 console.count("count");
 console.count("count");

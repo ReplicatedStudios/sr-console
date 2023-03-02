@@ -10,88 +10,95 @@ import { Writable } from "stream";
 import Socket from "socket.io";
 import SrPrint from "./SrPrint.js";
 
+
 export default class SrConsole {
-    static readonly SRCOLORS = iSrColors;
-    static readonly #DEFAULTPRINT: SrPrint = new SrPrint("SYSTEM");
-    static FILELOG?: Writable;
-    static FILERAW?: Writable;
-    static FILEHTML5?: Writable;
-    static IO?: Socket.Server;
-    
-    static #counts: counts = { default: 0 };
-    static #timers: { [key: string]: Date } = {};
-    static #config: iSrConfig;
-    static #groups = 0;
-    static #prefixGroup = "• ";
-
-    /** Clase por defecto de SrConsole, No utilizar la clase para sub-instanciar nuevas consolas durante el tiempo de ejecucion
-     * la clase no fue diseñada para ser instanciada mas de una vez*/
-    constructor(config: iSrConfig) {
-        SrConsole.#config = config;
-        const logdir = path.join(cwd(), config.FILE_DIR);
-
-        if (!fs.existsSync(logdir)) fs.mkdirSync(logdir, { recursive: true });
-        if (config.FILE_USE) SrConsole.FILELOG = fs.createWriteStream(path.join(logdir, "lastest.log"), { encoding: "utf-8", flags: "w" });
-        if (config.FILE_USE_RAW) SrConsole.FILERAW = fs.createWriteStream(path.join(logdir, "raw.log"), { encoding: "utf-8", flags: "a" });
-        if (config.HTML5) SrConsole.FILEHTML5 = fs.createWriteStream(path.join(logdir, "lastest.html"), { encoding: "utf-8", flags: "w" });
-
-        // PREVENIR NUEVAS INSTANCIAS
-        if (console instanceof SrConsole) console.fatal(new Error("Ya existe una instancia de SrConsole. ¡NO LO VUELVAS A HACER!"));
+    // DEFAULTS
+    static readonly #D_PRINT: SrPrint = new SrPrint("SYSTEM");
+    static readonly #D_GPREFIX = "• ";
+    static #D_CONFIG: iSrConfig;
+    public static setConfig(config: iSrConfig) { 
+        if (!this.#D_CONFIG) this.#D_CONFIG = config; 
+        else throw new Error("No se puede ingresar 2 veces la configuracion. ¡IDIOTA!")
     }
 
-    public static isInstanceExisting() { return this.#config && console instanceof this; }
-    static #print(data: PrintData) {
-        for (let i = 0; i < data.values.length; i++) data.values.push(iSrColors.parseTypeof(data.values.shift(), data.colors));
-
-        // BUILD
-        const groups = this.#prefixGroup.repeat(this.#groups);
-        const timestamp = new iSrTime(this.#config.TIME);
-        const prefix = (this.#config.LOG_PREFIX ? `${timestamp.toString().length == 0 ? timestamp : timestamp + " "}${data.prefix}` : timestamp);
-        const logs = data.values.join(" ").replace(/\n/gi, "\n" + "• ".repeat(this.#groups));
-
-        const output = `${iSrColors.get("MAGENTA").concat(groups)}${data.colors}${prefix == "" ? "::" : prefix + ":"} ${logs}${iSrColors.get("TRESET")}\n`;
-
-        //const output = `${iSrColors.get("MAGENTA") + "• ".repeat(this.#groups)}${data.colors}${new iSrTime(this.#config.TIME)}${this.#config.LOG_PREFIX ?? data.prefix}`;
-        SrConsole.FILELOG?.write(iSrColors.parseColorToText(output));
-        SrConsole.FILERAW?.write(iSrColors.parseToNone(output));
-
-        if (this.#config.HTML5) {
-            const outputHTML5 = iSrColors.parseColorToHTML5(iSrColors.parseColorToText(output));
-            SrConsole.FILEHTML5?.write(outputHTML5);
-            SrConsole.IO?.send(`srconsole:${data.std}`, outputHTML5);
-        } else SrConsole.IO?.send(`srconsole:${data.std}`, iSrColors.parseToNone(output));
-
-        if (data.std === "out") stdout.write(output);
-        else if (data.std === "err") stderr.write(output);
-        else throw new Error("No STD string specified");
-    }
-
+    // CLASES DUMP
     public readonly Console: typeof SrConsole = SrConsole;
     public readonly SrConsole: typeof SrConsole = SrConsole;
     public readonly SrPrint: typeof SrPrint = SrPrint;
-    public readonly iSrColors: typeof iSrColors = iSrColors;
-    public readonly iSrTime: typeof iSrTime = iSrTime;
+
+    // STDs
+    readonly #OUT: NodeJS.WritableStream;
+    readonly #ERR: NodeJS.WritableStream;
+
+    // UTILITY
+    readonly #WRITABLES: (Writable | null)[] = [null, null, null];
+    readonly #COUNTS: counts = { default: 0 };
+    readonly #TIMERS: { [key: string]: Date } = {};
+    readonly #CONFIG: iSrConfig;
+    #IO?: Socket.Server;
+    #G_COUNT = 0;
+
+    // CONSTRUCTOR
+    constructor(stdout: NodeJS.WritableStream, stderr?: NodeJS.WritableStream, ignoreErrors?: boolean, config?: iSrConfig) {
+        this.#CONFIG = config ?? SrConsole.#D_CONFIG;
+        this.#OUT = stdout;
+        this.#ERR = stderr ?? stdout;
+
+        const DIR = path.join(cwd(), this.#CONFIG.FILE_DIR);
+        if (!fs.existsSync(DIR)) fs.mkdirSync(DIR, { recursive: true });
+        if (this.#CONFIG.FILE_USE) this.#WRITABLES[0] = fs.createWriteStream(path.join(DIR, "lastest.log"), { encoding: "utf-8", flags: "w" });
+        if (this.#CONFIG.FILE_USE_RAW) this.#WRITABLES[1] = fs.createWriteStream(path.join(DIR, "lastest.log"), { encoding: "utf-8", flags: "w" });
+        if (this.#CONFIG.FILE_DIR) this.#WRITABLES[2] = fs.createWriteStream(path.join(DIR, "lastest.html"), { encoding: "utf-8", flags: "w" });
+    }
+
+    #print(data: PrintData) {
+        for (let i = 0; i < data.values.length; i++) data.values.push(iSrColors.parseTypeof(data.values.shift(), data.colors));
+        
+        // PRIMEROS PASOS
+        const GP = SrConsole.#D_GPREFIX.repeat(this.#G_COUNT);
+        const TS = new iSrTime(this.#CONFIG.TIME);
+        const PX = (this.#CONFIG.LOG_PREFIX ? `${TS.toString().length == 0 ? TS : TS + " "}${data.prefix}` : TS);
+        const LG = data.values.join(" ").replace(/\n/gi, "\n".concat(GP));
+
+        const output = `${iSrColors.get("MAGENTA")}${GP}${data.colors}${PX == "" ? "::" : PX + ":"} ${LG}${iSrColors.get("TRESET")}\n`;
+
+        this.#WRITABLES[0]?.write(iSrColors.parseColorToText(output));
+        this.#WRITABLES[1]?.write(iSrColors.parseToNone(output));
+
+        if (this.#CONFIG.HTML5) {
+            const outputH5 = iSrColors.parseColorToHTML5(iSrColors.parseColorToText(output));
+            this.#IO?.send(`srconsole:${data.std}`, outputH5);
+            this.#WRITABLES[2]?.write(outputH5)
+        } else this.#IO?.send(`srconsole:${data.std}`, iSrColors.parseToNone(output));
+
+    
+        if (data.std === "out") stdout.write(output);
+        else if (data.std === "err") stderr.write(output);
+        else throw new Error("No STD string specified, app is on a broken state?");
+    }
 
     public get memory() { return Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100; }
-    public get defaultPrint() { return SrConsole.#DEFAULTPRINT; }
+    public get defaultPrint() { return SrConsole.#D_PRINT; }
     public setSocketIO(socket: Socket.Server) {
         if (typeof socket.send !== "function") {
-            if (!SrConsole.#config.LOG_PREFIX) SrConsole.#print(new PrintObject("err", "SR-CONSOLE", iSrColors.get("RED"), "No se pudo instalar el Socket en la consola"));
-            else SrConsole.#DEFAULTPRINT.send("E", "No se pudo instalar el Socket en la consola")
+            this.#print(new PrintObject("err", "SR-CONSOLE", iSrColors.get("RED"), "No se pudo instalar el Socket en la consola"));
             return false;
         } else { 
-            SrConsole.IO = socket;
-            if (!SrConsole.#config.LOG_PREFIX) SrConsole.#print(new PrintObject("out", "SR-CONSOLE", iSrColors.get("GREEN", "TBRIGHT"), "Se monto el Socket en la consola exitosamente"));
-            else SrConsole.#DEFAULTPRINT.send("S", "Se monto el Socket a la consola exitosamente")
+            this.#IO = socket;
+            this.#print(new PrintObject("out", "SR-CONSOLE", iSrColors.get("GREEN", "TBRIGHT"), "Se monto el Socket en la consola exitosamente"));
             return true;
         }
     }
 
-    public load(from: "RAW" | "NORMAL" | "H5") {
+    /** 
+     * Lee los archivos .log de la consola y te regresa el contenido en un Buffer
+     * @param {string} from
+    */
+    public fileLoad(from: "RAW" | "NORMAL" | "H5") {
         switch(from) {
-            case "RAW": return fs.readFileSync(path.join(SrConsole.#config.FILE_DIR, "raw.log"));
-            case "NORMAL": return fs.readFileSync(path.join(SrConsole.#config.FILE_DIR, "lastest.log"));
-            case "H5": return fs.readFileSync(path.join(SrConsole.#config.FILE_DIR, "lastest.html"));
+            case "RAW": return fs.readFileSync(path.join(this.#CONFIG.FILE_DIR, "raw.log"));
+            case "NORMAL": return fs.readFileSync(path.join(this.#CONFIG.FILE_DIR, "lastest.log"));
+            case "H5": return fs.readFileSync(path.join(this.#CONFIG.FILE_DIR, "lastest.html"));
             default: this.fatal(new Error("No es valido el archivo" + from + "solicitado"));
         }
     }
@@ -114,43 +121,43 @@ export default class SrConsole {
 
     public count(label?: string): void {
         const l = label ?? "default"
-        const c = SrConsole.#counts[l] == undefined ? SrConsole.#counts[l] = 0 : SrConsole.#counts[l] += 1;
+        const c = this.#COUNTS[l] == undefined ? this.#COUNTS[l] = 0 : this.#COUNTS[l] += 1;
         this.debug(`Contador '${l}' cambio a`, c);
     }
 
     public countReset(label?: string): void {
-        SrConsole.#counts[label ?? "default"] = 0;
+        this.#COUNTS[label ?? "default"] = 0;
         this.debug(`Contador '${label ?? "default"}' fue reiniciado`)
     }
 
     public debug(message: unknown, ...optionalParams: unknown[]): void {
-        SrConsole.#print(new PrintObject("out", "DEBUG", iSrColors.get("BLACK", "TBLINK"), message, ...optionalParams));
+        this.#print(new PrintObject("out", "DEBUG", iSrColors.get("BLACK", "TBRIGHT"), message, ...optionalParams));
         debugger;
     }
 
     public err(message: unknown, ...optionalParams: unknown[]): void { this.error(message, ...optionalParams) }
     public error(message: unknown, ...optionalParams: unknown[]): void {
-        SrConsole.#print(new PrintObject("err", "ERROR", iSrColors.get("RED"), message, ...optionalParams));
+        this.#print(new PrintObject("err", "ERROR", iSrColors.get("RED"), message, ...optionalParams));
     }
 
     public group(message: any, ...optionalParams: any[]): void {
-        SrConsole.#print(new PrintObject("out", "INFO", iSrColors.get("MAGENTA"), message, ...optionalParams));
-        SrConsole.#groups++;
+        this.#print(new PrintObject("out", "INFO", iSrColors.get("MAGENTA"), message, ...optionalParams));
+        this.#G_COUNT++;
     }
 
     /** Elimina un grupo de logs. no emitira nada si no hay grupos activos */
     public groupCollapsed(message: any): void {
-        if (!(SrConsole.#groups > 0)) return;
-        SrConsole.#groups--;
-        SrConsole.#print(new PrintObject("out", "INFO", iSrColors.get("MAGENTA"), message));
+        if (!(this.#G_COUNT > 0)) return;
+        this.#G_COUNT--;
+        this.#print(new PrintObject("out", "INFO", iSrColors.get("MAGENTA"), message));
     }
 
     /** Alias de `groupCollapsed(:string)`
      *
      * Elimina un grupo de logs. no emitira nada si no hay grupos activos */
     public unGroup(message: any) {
-        SrConsole.#groups = 0;
-        SrConsole.#print(new PrintObject("out", "INFO", iSrColors.get("MAGENTA"), message));
+        this.#G_COUNT = 0;
+        this.#print(new PrintObject("out", "INFO", iSrColors.get("MAGENTA"), message));
     }
 
     /** Elimina todos los grupos activos. no emitira nada si no hay grupos activos */
@@ -158,25 +165,25 @@ export default class SrConsole {
     public groupEnd(message: any): void;
     public groupEnd(message?: any): void { this.groupCollapsed(message ?? "<--"); }
     public info(message: any, ...optionalParams: any[]): void {
-        SrConsole.#print(new PrintObject("out", "INFO", iSrColors.get("CYAN"), message, ...optionalParams));
+        this.#print(new PrintObject("out", "INFO", iSrColors.get("CYAN"), message, ...optionalParams));
     }
 
     public send(message: any, ...optionalParams: any[]) {
         const data = [message, ...optionalParams];
-        for (let i = 0; i < data.length; i++) for (const toHide of SrConsole.#config.FILTER) {
+        for (let i = 0; i < data.length; i++) for (const toHide of SrConsole.#D_CONFIG.FILTER) {
                 if (typeof data[i] === "string") data[i] = data[i].replace(new RegExp(toHide, "gi"), "[REDACTED]")
         }
 
-        SrConsole.#print(new PrintObject("out", `L${iSrColors.get("RED")}OG${iSrColors.get("BLUE")}S`, iSrColors.get("BLUE"), ...data));
+        this.#print(new PrintObject("out", `L${iSrColors.get("RED")}OG${iSrColors.get("BLUE")}S`, iSrColors.get("BLUE"), ...data));
     }
 
     public success(message: any, ...optionalParams: any[]) {
-        SrConsole.#print(new PrintObject("out", "SUCCESS", iSrColors.get("GREEN"), message, ...optionalParams));
+        this.#print(new PrintObject("out", "SUCCESS", iSrColors.get("GREEN"), message, ...optionalParams));
     }
 
     /** Envia un error fatal a la consola pero sin finalizar el proceso */
     public fatalBack(message: Error): void {
-        SrConsole.#print(new PrintObject("err", "FATAL-ERROR", iSrColors.get("ZWHITE", "TBRIGHT", "RED"), message.stack));
+        this.#print(new PrintObject("err", "FATAL-ERROR", iSrColors.get("ZWHITE", "TBRIGHT", "RED"), message.stack));
     }
 
     /** Envia un error fatal a la consola y finaliza el proceso */
@@ -189,7 +196,7 @@ export default class SrConsole {
     public trace(message: Error) { return this.fatal(message); }
 
     public log(message: any, ...optionalParams: any[]): void {
-        SrConsole.#print(new PrintObject("out", "LOGS", iSrColors.get("BLUE"), message, ...optionalParams));
+        this.#print(new PrintObject("out", "LOGS", iSrColors.get("BLUE"), message, ...optionalParams));
     }
 
     /** Returna el primer valor ingresado (ignorando posteriores) y Envia a SrConsole.info() todos los parametros  **/
@@ -199,29 +206,29 @@ export default class SrConsole {
     }
 
     public warn(message: any, ...optionalParams: unknown[]): void {
-        SrConsole.#print(new PrintObject("err", "WARN", iSrColors.get("YELLOW"), message, ...optionalParams));
+        this.#print(new PrintObject("err", "WARN", iSrColors.get("YELLOW"), message, ...optionalParams));
     }
 
     public time(label?: string) { 
-        SrConsole.#timers[label ?? "default"] = new Date();
+        this.#TIMERS[label ?? "default"] = new Date();
         this.debug(`Temporizador '${label ?? "default"}' iniciado`);
     }
 
     public timeEnd(label?: string) {
-        const saved = SrConsole.#timers[label ?? "default"];
+        const saved = this.#TIMERS[label ?? "default"];
         // @ts-expect-error
-        SrConsole.#timers[label ?? "default"] = undefined;
+        this.#TIMERS[label ?? "default"] = undefined;
         this.debug(`Temporizador '${label ?? "default"}' finalizado: ${Math.abs(new Date().getTime() - saved.getTime())}ms`)
     }
 
     public timeLog(label?: string) {
-        const saved = SrConsole.#timers[label ?? "default"];
+        const saved = this.#TIMERS[label ?? "default"];
         this.debug(`Tiempo del temporizador '${label ?? "default"}': ${Math.abs(new Date().getTime() - saved.getTime())}ms`);
     }
 
     public timeStamp(label?: string) {
         this.timeLog(label);
-        return SrConsole.#timers[label ?? "default"];
+        return this.#TIMERS[label ?? "default"];
     }
     public clear() { stdout.write("\u001b[2J\u001b[0;0H"); stderr.write("\u001b[2J\u001b[0;0H"); }
     

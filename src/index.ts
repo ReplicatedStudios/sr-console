@@ -37,11 +37,9 @@ declare global {
     interface Console extends SrConsole {}
 }
 
-global.LOG = new SrConsole(config);
-globalThis.LOG = new SrConsole(config);
 
-global.PRINT = LOG.defaultPrint;
-globalThis.PRINT = LOG.defaultPrint;
+globalThis.LOG = global.LOG = new SrConsole(process.stdout, process.stderr, true, config);
+global.PRINT = globalThis.PRINT = LOG.defaultPrint;
 
 // @ts-expect-error
 if (!override || override === "" || override === "true" || override !== "false") global.console = global.LOG;
